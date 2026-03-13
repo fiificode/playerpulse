@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Volume2, VolumeX } from "lucide-react";
 import { Hero } from "@/components/Hero";
@@ -11,11 +11,13 @@ import { useVoteStore } from "@/store/useVoteStore";
 import { VoteResults } from "@/components/VoteResults";
 import { CountdownTimer } from "@/components/CountdownTimer";
 import { ShareWinner } from "@/components/ShareWinner";
+import { WinnerBanner } from "@/components/WinnerBanner";
 
 export default function Home() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const nomineesRef = useRef<HTMLDivElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [votingClosed, setVotingClosed] = useState(false);
 
   const {
     players,
@@ -28,6 +30,7 @@ export default function Home() {
     vote,
     resetCelebration,
     toggleSound,
+    hydrateFromStorage,
   } = useVoteStore();
 
   const sortedPlayers = useMemo(
@@ -37,11 +40,80 @@ export default function Home() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    const storageKey = "playerpulse-votes";
+
+    try {
+      const raw = window.localStorage.getItem(storageKey);
+      if (raw) {
+        const parsed = JSON.parse(raw) as {
+          players?: typeof players;
+          totalVotes?: number;
+          weekDeadline?: string;
+        };
+        hydrateFromStorage(parsed);
+      }
+    } catch {
+      // ignore malformed storage
+    }
+
+    const unsubscribe = useVoteStore.subscribe((state) => {
+      const snapshot = {
+        players: state.players,
+        totalVotes: state.totalVotes,
+        weekDeadline: state.weekDeadline,
+      };
+        try {
+          window.localStorage.setItem(storageKey, JSON.stringify(snapshot));
+        } catch {
+          // ignore write errors
+        }
+      });
+
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== storageKey || !event.newValue) return;
+      try {
+        const parsed = JSON.parse(event.newValue) as {
+          players?: typeof players;
+          totalVotes?: number;
+          weekDeadline?: string;
+        };
+        hydrateFromStorage(parsed);
+      } catch {
+        // ignore malformed updates
+      }
+    };
+
+    window.addEventListener("storage", onStorage);
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener("storage", onStorage);
+    };
+  }, [hydrateFromStorage, players]);
+
+  useEffect(() => {
+    const deadlineMs = new Date(weekDeadline).getTime();
+    const updateClosed = () => {
+      setVotingClosed(Date.now() >= deadlineMs);
+    };
+
+    updateClosed();
+    if (Date.now() >= deadlineMs) {
+      return;
+    }
+
+    const id = setInterval(updateClosed, 1000);
+    return () => clearInterval(id);
+  }, [weekDeadline]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
     audioRef.current = new Audio("/audio/crowd-cheer.mp3");
   }, []);
 
   const handleVote = (playerId: string) => {
-    if (hasVoted) return;
+    if (hasVoted || votingClosed) return;
     vote(playerId);
 
     if (soundEnabled && audioRef.current) {
@@ -142,7 +214,7 @@ export default function Home() {
                     player={player}
                     percentage={percentage}
                     isSelected={isSelected}
-                    isDisabled={hasVoted}
+                    isDisabled={hasVoted || votingClosed}
                     isCelebrating={celebrationPlayerId === player.id}
                     onVote={() => handleVote(player.id)}
                   />
@@ -157,12 +229,21 @@ export default function Home() {
         </section>
 
         <section className="mt-4 grid gap-6 md:grid-cols-[minmax(0,2fr)_minmax(0,1.3fr)]">
-          <VoteResults
-            players={players}
-            selectedPlayerId={selectedPlayerId}
-            totalVotes={totalVotes}
-          />
-          <ShareWinner totalVotes={totalVotes} leader={currentLeader} />
+          {votingClosed && currentLeader ? (
+            <>
+              <WinnerBanner winner={currentLeader} />
+              <ShareWinner totalVotes={totalVotes} leader={currentLeader} />
+            </>
+          ) : (
+            <>
+              <VoteResults
+                players={players}
+                selectedPlayerId={selectedPlayerId}
+                totalVotes={totalVotes}
+              />
+              <ShareWinner totalVotes={totalVotes} leader={currentLeader} />
+            </>
+          )}
         </section>
       </div>
     </main>

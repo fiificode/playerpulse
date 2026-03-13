@@ -17,13 +17,18 @@ type VoteActions = {
   vote: (playerId: string) => void;
   resetCelebration: () => void;
   toggleSound: () => void;
+  hydrateFromStorage: (payload: {
+    players?: Player[];
+    totalVotes?: number;
+    weekDeadline?: string;
+  }) => void;
 };
 
 type VoteStore = VoteState & VoteActions;
 
-const oneWeekFromNow = () => {
+const twoMinutesFromNow = () => {
   const now = new Date();
-  now.setDate(now.getDate() + 7);
+  now.setMinutes(now.getMinutes() + 2);
   return now.toISOString();
 };
 
@@ -35,7 +40,7 @@ export const useVoteStore = create<VoteStore>((set, get) => ({
   voteInProgress: false,
   celebrationPlayerId: null,
   soundEnabled: true,
-  weekDeadline: oneWeekFromNow(),
+  weekDeadline: twoMinutesFromNow(),
 
   vote: (playerId: string) => {
     const { hasVoted } = get();
@@ -68,11 +73,16 @@ export const useVoteStore = create<VoteStore>((set, get) => ({
     set((state) => ({
       soundEnabled: !state.soundEnabled,
     })),
+
+  hydrateFromStorage: (payload) =>
+    set((state) => ({
+      ...state,
+      players: payload.players ?? state.players,
+      totalVotes:
+        typeof payload.totalVotes === "number"
+          ? payload.totalVotes
+          : state.totalVotes,
+      weekDeadline: payload.weekDeadline ?? state.weekDeadline,
+    })),
 }));
-
-export const selectSortedPlayers = (state: VoteStore) =>
-  [...state.players].sort((a, b) => b.votes - a.votes);
-
-export const selectTotalVotes = (state: VoteStore) =>
-  state.totalVotes || state.players.reduce((sum, p) => sum + p.votes, 0);
 
