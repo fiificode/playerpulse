@@ -1,65 +1,171 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useMemo, useRef } from "react";
+import { motion } from "framer-motion";
+import { Volume2, VolumeX } from "lucide-react";
+import { Hero } from "@/components/Hero";
+import { PlayerCard } from "@/components/PlayerCard";
+import { Leaderboard } from "@/components/Leaderboard";
+import { AnimatedBackground } from "@/components/AnimatedBackground";
+import {
+  useVoteStore,
+  selectSortedPlayers,
+  selectTotalVotes,
+} from "@/store/useVoteStore";
+import { VoteResults } from "@/components/VoteResults";
+import { CountdownTimer } from "@/components/CountdownTimer";
+import { ShareWinner } from "@/components/ShareWinner";
 
 export default function Home() {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const nomineesRef = useRef<HTMLDivElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const {
+    players,
+    selectedPlayerId,
+    hasVoted,
+    celebrationPlayerId,
+    soundEnabled,
+    weekDeadline,
+    vote,
+    resetCelebration,
+    toggleSound,
+  } = useVoteStore();
+
+  const sortedPlayers = useVoteStore(selectSortedPlayers);
+  const totalVotes = useVoteStore(selectTotalVotes);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    audioRef.current = new Audio("/audio/crowd-cheer.mp3");
+  }, []);
+
+  const handleVote = (playerId: string) => {
+    if (hasVoted) return;
+    vote(playerId);
+
+    if (soundEnabled && audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => {
+        // ignore playback errors (e.g. autoplay restrictions)
+      });
+    }
+
+    setTimeout(() => {
+      resetCelebration();
+    }, 1200);
+  };
+
+  const handleStartVoting = () => {
+    if (!nomineesRef.current) return;
+    nomineesRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const totalVotesForPercentages = useMemo(
+    () =>
+      totalVotes > 0
+        ? totalVotes
+        : players.reduce((sum, p) => sum + p.votes, 0),
+    [players, totalVotes],
+  );
+
+  const currentLeader = sortedPlayers[0] ?? null;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <main
+      ref={containerRef}
+      className="relative min-h-screen w-full overflow-hidden bg-linear-to-b from-slate-950 via-slate-950 to-slate-950 pb-20 text-slate-50"
+    >
+      <AnimatedBackground />
+
+      <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pt-8 sm:px-6 md:px-8 md:pt-12">
+        <header className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-300/80">
+              PlayerPulse
+            </p>
+            <h1 className="text-lg font-semibold text-slate-100">
+              Premier League Player of the Week
+            </h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <CountdownTimer deadline={weekDeadline} />
+            <button
+              type="button"
+              onClick={toggleSound}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-700/80 bg-slate-900/80 text-slate-200 shadow-[0_0_16px_rgba(15,23,42,0.8)] transition hover:border-sky-400/80 hover:text-sky-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+              aria-label={
+                soundEnabled ? "Mute crowd audio" : "Unmute crowd audio"
+              }
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+              {soundEnabled ? (
+                <Volume2 className="h-4 w-4" />
+              ) : (
+                <VolumeX className="h-4 w-4" />
+              )}
+            </button>
+          </div>
+        </header>
+
+        <Hero onStartVoting={handleStartVoting} />
+
+        <section
+          ref={nomineesRef}
+          className="mt-4 flex flex-col gap-10 md:mt-2 md:flex-row"
+        >
+          <div className="flex-1">
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <motion.h2
+                className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-300"
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.4 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+              >
+                Nominees
+              </motion.h2>
+              <p className="text-[11px] text-slate-400">
+                You can only vote once per session.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {players.map((player) => {
+                const percentage =
+                  totalVotesForPercentages > 0
+                    ? (player.votes / totalVotesForPercentages) * 100
+                    : 0;
+                const isSelected = selectedPlayerId === player.id;
+
+                return (
+                  <PlayerCard
+                    key={player.id}
+                    player={player}
+                    percentage={percentage}
+                    isSelected={isSelected}
+                    isDisabled={hasVoted}
+                    isCelebrating={celebrationPlayerId === player.id}
+                    onVote={() => handleVote(player.id)}
+                  />
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="w-full md:w-[360px] lg:w-[380px]">
+            <Leaderboard players={sortedPlayers} totalVotes={totalVotes} />
+          </div>
+        </section>
+
+        <section className="mt-4 grid gap-6 md:grid-cols-[minmax(0,2fr)_minmax(0,1.3fr)]">
+          <VoteResults
+            players={players}
+            selectedPlayerId={selectedPlayerId}
+            totalVotes={totalVotes}
+          />
+          <ShareWinner totalVotes={totalVotes} leader={currentLeader} />
+        </section>
+      </div>
+    </main>
   );
 }

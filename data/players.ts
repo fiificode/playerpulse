@@ -1,0 +1,68 @@
+import type { Player } from "@/types/player";
+
+export const players: Player[] = [
+  {
+    id: "haaland",
+    name: "Erling Haaland",
+    club: "Manchester City",
+    position: "Striker",
+    image: "/app/assets/players/haaland.jpg",
+    votes: 0,
+  },
+  {
+    id: "salah",
+    name: "Mohamed Salah",
+    club: "Liverpool",
+    position: "Right Winger",
+    image: "/app/assets/players/salah.jpg",
+    votes: 0,
+  },
+  {
+    id: "odegaard",
+    name: "Martin Ødegaard",
+    club: "Arsenal",
+    position: "Attacking Midfielder",
+    image: "/app/assets/players/odegaard.jpg",
+    votes: 0,
+  },
+  {
+    id: "bruno",
+    name: "Bruno Fernandes",
+    club: "Manchester United",
+    position: "Attacking Midfielder",
+    image: "/app/assets/players/bruno.jpg",
+    votes: 0,
+  },
+  {
+    id: "son",
+    name: "Heung-min Son",
+    club: "Tottenham Hotspur",
+    position: "Left Forward",
+    image: "/app/assets/players/son.jpg",
+    votes: 0,
+  },
+  {
+    id: "saka",
+    name: "Bukayo Saka",
+    club: "Arsenal",
+    position: "Right Winger",
+    image: "/app/assets/players/saka.jpg",
+    votes: 0,
+  },
+  {
+    id: "palmer",
+    name: "Cole Palmer",
+    club: "Chelsea",
+    position: "Attacking Midfielder",
+    image: "/app/assets/players/palmer.jpg",
+    votes: 0,
+  },
+  {
+    id: "van-dijk",
+    name: "Virgil van Dijk",
+    club: "Liverpool",
+    position: "Centre Back",
+    image: "/app/assets/players/van-dijk.jpg",
+    votes: 0,
+  },
+];
