@@ -79,12 +79,12 @@ export default function Home() {
         totalVotes: state.totalVotes,
         weekDeadline: state.weekDeadline,
       };
-        try {
-          window.localStorage.setItem(storageKey, JSON.stringify(snapshot));
-        } catch {
-          // ignore write errors
-        }
-      });
+      try {
+        window.localStorage.setItem(storageKey, JSON.stringify(snapshot));
+      } catch {
+        // ignore write errors
+      }
+    });
 
     const onStorage = (event: StorageEvent) => {
       if (event.key !== storageKey || !event.newValue) return;
@@ -173,9 +173,13 @@ export default function Home() {
 
   const handleStartVoting = () => {
     setPhase("voting");
-    if (nomineesRef.current) {
-      nomineesRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    // Defer scroll to allow DOM to update with voting phase content
+    requestAnimationFrame(() => {
+      nomineesRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
   };
 
   const totalVotesForPercentages = useMemo(
@@ -327,7 +331,10 @@ export default function Home() {
                 </div>
 
                 <div className="w-full md:w-[360px] lg:w-[380px]">
-                  <Leaderboard players={sortedPlayers} totalVotes={totalVotes} />
+                  <Leaderboard
+                    players={sortedPlayers}
+                    totalVotes={totalVotes}
+                  />
                 </div>
               </section>
             </motion.div>
