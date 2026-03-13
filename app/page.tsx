@@ -12,12 +12,14 @@ import { VoteResults } from "@/components/VoteResults";
 import { CountdownTimer } from "@/components/CountdownTimer";
 import { ShareWinner } from "@/components/ShareWinner";
 import { WinnerBanner } from "@/components/WinnerBanner";
+import { WinnerOverlay } from "@/components/WinnerOverlay";
 
 export default function Home() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const nomineesRef = useRef<HTMLDivElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [votingClosed, setVotingClosed] = useState(false);
+  const [showWinnerOverlay, setShowWinnerOverlay] = useState(false);
 
   const {
     players,
@@ -37,6 +39,15 @@ export default function Home() {
     () => [...players].sort((a, b) => b.votes - a.votes),
     [players],
   );
+
+  const previousClosedRef = useRef(false);
+
+  useEffect(() => {
+    if (votingClosed && !previousClosedRef.current && sortedPlayers[0]) {
+      setShowWinnerOverlay(true);
+    }
+    previousClosedRef.current = votingClosed;
+  }, [votingClosed, sortedPlayers]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -149,6 +160,13 @@ export default function Home() {
       className="relative min-h-screen w-full overflow-hidden bg-linear-to-b from-slate-950 via-slate-950 to-slate-950 pb-20 text-slate-50"
     >
       <AnimatedBackground />
+
+      {votingClosed && currentLeader && showWinnerOverlay && (
+        <WinnerOverlay
+          winner={currentLeader}
+          onClose={() => setShowWinnerOverlay(false)}
+        />
+      )}
 
       <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pt-8 sm:px-6 md:px-8 md:pt-12">
         <header className="flex items-center justify-between gap-3">
