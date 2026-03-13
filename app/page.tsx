@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Volume2, VolumeX } from "lucide-react";
 import { Hero } from "@/components/Hero";
 import { PlayerCard } from "@/components/PlayerCard";
@@ -20,6 +20,11 @@ export default function Home() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [votingClosed, setVotingClosed] = useState(false);
   const [showWinnerOverlay, setShowWinnerOverlay] = useState(false);
+  const [phase, setPhase] = useState<"intro" | "voting" | "leaderboard">(
+    "intro",
+  );
+  const [introCount, setIntroCount] = useState(3);
+  const [introReady, setIntroReady] = useState(false);
 
   const {
     players,
@@ -104,6 +109,27 @@ export default function Home() {
   }, [hydrateFromStorage, players]);
 
   useEffect(() => {
+    if (phase !== "intro") return;
+
+    let count = 3;
+    setIntroCount(count);
+    setIntroReady(false);
+
+    const id = setInterval(() => {
+      count -= 1;
+      if (count <= 0) {
+        clearInterval(id);
+        setIntroCount(0);
+        setIntroReady(true);
+      } else {
+        setIntroCount(count);
+      }
+    }, 900);
+
+    return () => clearInterval(id);
+  }, [phase]);
+
+  useEffect(() => {
     const deadlineMs = new Date(weekDeadline).getTime();
     const updateClosed = () => {
       setVotingClosed(Date.now() >= deadlineMs);
@@ -123,6 +149,12 @@ export default function Home() {
     audioRef.current = new Audio("/audio/crowd-cheer.mp3");
   }, []);
 
+  useEffect(() => {
+    if (phase === "voting" && hasVoted) {
+      setPhase("leaderboard");
+    }
+  }, [hasVoted, phase]);
+
   const handleVote = (playerId: string) => {
     if (hasVoted || votingClosed) return;
     vote(playerId);
@@ -140,8 +172,10 @@ export default function Home() {
   };
 
   const handleStartVoting = () => {
-    if (!nomineesRef.current) return;
-    nomineesRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    setPhase("voting");
+    if (nomineesRef.current) {
+      nomineesRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
 
   const totalVotesForPercentages = useMemo(
@@ -197,72 +231,133 @@ export default function Home() {
           </div>
         </header>
 
-        <Hero onStartVoting={handleStartVoting} />
-
-        <section
-          ref={nomineesRef}
-          className="mt-4 flex flex-col gap-10 md:mt-2 md:flex-row"
-        >
-          <div className="flex-1">
-            <div className="mb-4 flex items-center justify-between gap-2">
-              <motion.h2
-                className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-300"
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.4 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-              >
-                Nominees
-              </motion.h2>
-              <p className="text-[11px] text-slate-400">
-                You can only vote once per session.
+        <AnimatePresence mode="wait">
+          {phase === "intro" && (
+            <motion.section
+              key="intro"
+              className="flex min-h-[60vh] flex-col items-center justify-center gap-6 text-center"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -30 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+            >
+              <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-400">
+                Matchday Voting
               </p>
-            </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {players.map((player) => {
-                const percentage =
-                  totalVotesForPercentages > 0
-                    ? (player.votes / totalVotesForPercentages) * 100
-                    : 0;
-                const isSelected = selectedPlayerId === player.id;
-
-                return (
-                  <PlayerCard
-                    key={player.id}
-                    player={player}
-                    percentage={percentage}
-                    isSelected={isSelected}
-                    isDisabled={hasVoted || votingClosed}
-                    isCelebrating={celebrationPlayerId === player.id}
-                    onVote={() => handleVote(player.id)}
-                  />
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="w-full md:w-[360px] lg:w-[380px]">
-            <Leaderboard players={sortedPlayers} totalVotes={totalVotes} />
-          </div>
-        </section>
-
-        <section className="mt-4 grid gap-6 md:grid-cols-[minmax(0,2fr)_minmax(0,1.3fr)]">
-          {votingClosed && currentLeader ? (
-            <>
-              <WinnerBanner winner={currentLeader} />
-              <ShareWinner totalVotes={totalVotes} leader={currentLeader} />
-            </>
-          ) : (
-            <>
-              <VoteResults
-                players={players}
-                selectedPlayerId={selectedPlayerId}
-                totalVotes={totalVotes}
-              />
-              <ShareWinner totalVotes={totalVotes} leader={currentLeader} />
-            </>
+              <motion.div
+                className="text-7xl font-semibold text-sky-200 md:text-8xl"
+                key={`count-${introCount}`}
+                initial={{ scale: 0.6, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 1.2, opacity: 0 }}
+                transition={{ duration: 0.45, ease: "easeOut" }}
+              >
+                {introCount > 0 ? introCount : "GO"}
+              </motion.div>
+              <p className="max-w-lg text-balance text-sm text-slate-400 md:text-base">
+                Get ready to crown the Player of the Week. Cast one vote and
+                watch the leaderboard evolve live.
+              </p>
+              {introReady && (
+                <motion.button
+                  type="button"
+                  onClick={handleStartVoting}
+                  className="group relative mt-2 inline-flex items-center gap-2 rounded-full border border-sky-400/70 bg-sky-500/20 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-sky-100 shadow-[0_0_25px_rgba(56,189,248,0.5)] transition hover:border-sky-300 hover:bg-sky-400/30 hover:shadow-[0_0_40px_rgba(56,189,248,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                >
+                  <span>Start Voting</span>
+                  <span className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-sky-500/40 blur-xl" />
+                </motion.button>
+              )}
+            </motion.section>
           )}
-        </section>
+
+          {phase === "voting" && (
+            <motion.div
+              key="voting"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -30 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+            >
+              <Hero onStartVoting={handleStartVoting} />
+
+              <section
+                ref={nomineesRef}
+                className="mt-4 flex flex-col gap-10 md:mt-2 md:flex-row"
+              >
+                <div className="flex-1">
+                  <div className="mb-4 flex items-center justify-between gap-2">
+                    <motion.h2
+                      className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-300"
+                      initial={{ opacity: 0, y: 12 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.4 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                    >
+                      Nominees
+                    </motion.h2>
+                    <p className="text-[11px] text-slate-400">
+                      You can only vote once per session.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    {players.map((player) => {
+                      const percentage =
+                        totalVotesForPercentages > 0
+                          ? (player.votes / totalVotesForPercentages) * 100
+                          : 0;
+                      const isSelected = selectedPlayerId === player.id;
+
+                      return (
+                        <PlayerCard
+                          key={player.id}
+                          player={player}
+                          percentage={percentage}
+                          isSelected={isSelected}
+                          isDisabled={hasVoted || votingClosed}
+                          isCelebrating={celebrationPlayerId === player.id}
+                          onVote={() => handleVote(player.id)}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="w-full md:w-[360px] lg:w-[380px]">
+                  <Leaderboard players={sortedPlayers} totalVotes={totalVotes} />
+                </div>
+              </section>
+            </motion.div>
+          )}
+
+          {phase === "leaderboard" && (
+            <motion.section
+              key="leaderboard"
+              className="mt-2 grid gap-8 md:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)]"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -30 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+            >
+              <div className="space-y-6">
+                {votingClosed && currentLeader ? (
+                  <WinnerBanner winner={currentLeader} />
+                ) : (
+                  <VoteResults
+                    players={players}
+                    selectedPlayerId={selectedPlayerId}
+                    totalVotes={totalVotes}
+                  />
+                )}
+                <ShareWinner totalVotes={totalVotes} leader={currentLeader} />
+              </div>
+              <Leaderboard players={sortedPlayers} totalVotes={totalVotes} />
+            </motion.section>
+          )}
+        </AnimatePresence>
       </div>
     </main>
   );
