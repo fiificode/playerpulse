@@ -6,7 +6,7 @@ export const players: Player[] = [
     name: "Erling Haaland",
     club: "Manchester City",
     position: "Striker",
-    image: "/app/assets/players/haaland.jpg",
+    image: "/assets/players/haaland.jpg",
     votes: 0,
   },
   {
@@ -14,7 +14,7 @@ export const players: Player[] = [
     name: "Mohamed Salah",
     club: "Liverpool",
     position: "Right Winger",
-    image: "/app/assets/players/salah.jpg",
+    image: "/assets/players/salah.jpg",
     votes: 0,
   },
   {
@@ -22,7 +22,7 @@ export const players: Player[] = [
     name: "Martin Ødegaard",
     club: "Arsenal",
     position: "Attacking Midfielder",
-    image: "/app/assets/players/odegaard.jpg",
+    image: "/assets/players/odegaard.jpg",
     votes: 0,
   },
   {
@@ -30,7 +30,7 @@ export const players: Player[] = [
     name: "Bruno Fernandes",
     club: "Manchester United",
     position: "Attacking Midfielder",
-    image: "/app/assets/players/bruno.jpg",
+    image: "/assets/players/bruno.jpg",
     votes: 0,
   },
   {
@@ -38,7 +38,7 @@ export const players: Player[] = [
     name: "Heung-min Son",
     club: "Tottenham Hotspur",
     position: "Left Forward",
-    image: "/app/assets/players/son.jpg",
+    image: "/assets/players/son.jpg",
     votes: 0,
   },
   {
@@ -46,7 +46,7 @@ export const players: Player[] = [
     name: "Bukayo Saka",
     club: "Arsenal",
     position: "Right Winger",
-    image: "/app/assets/players/saka.jpg",
+    image: "/assets/players/saka.jpg",
     votes: 0,
   },
   {
@@ -54,7 +54,7 @@ export const players: Player[] = [
     name: "Cole Palmer",
     club: "Chelsea",
     position: "Attacking Midfielder",
-    image: "/app/assets/players/palmer.jpg",
+    image: "/assets/players/palmer.jpg",
     votes: 0,
   },
   {
@@ -62,7 +62,7 @@ export const players: Player[] = [
     name: "Virgil van Dijk",
     club: "Liverpool",
     position: "Centre Back",
-    image: "/app/assets/players/van-dijk.jpg",
+    image: "/assets/players/van-dijk.jpg",
     votes: 0,
   },
 ];

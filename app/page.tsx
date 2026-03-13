@@ -7,11 +7,7 @@ import { Hero } from "@/components/Hero";
 import { PlayerCard } from "@/components/PlayerCard";
 import { Leaderboard } from "@/components/Leaderboard";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
-import {
-  useVoteStore,
-  selectSortedPlayers,
-  selectTotalVotes,
-} from "@/store/useVoteStore";
+import { useVoteStore } from "@/store/useVoteStore";
 import { VoteResults } from "@/components/VoteResults";
 import { CountdownTimer } from "@/components/CountdownTimer";
 import { ShareWinner } from "@/components/ShareWinner";
@@ -28,13 +24,16 @@ export default function Home() {
     celebrationPlayerId,
     soundEnabled,
     weekDeadline,
+    totalVotes,
     vote,
     resetCelebration,
     toggleSound,
   } = useVoteStore();
 
-  const sortedPlayers = useVoteStore(selectSortedPlayers);
-  const totalVotes = useVoteStore(selectTotalVotes);
+  const sortedPlayers = useMemo(
+    () => [...players].sort((a, b) => b.votes - a.votes),
+    [players],
+  );
 
   useEffect(() => {
     if (typeof window === "undefined") return;
