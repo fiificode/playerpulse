@@ -85,7 +85,7 @@ export default function Home() {
               PlayerPulse
             </p>
             <h1 className="text-lg font-semibold text-slate-100">
-              Premier League Player of the Week
+              Player of the Week
             </h1>
           </div>
           <div className="flex items-center gap-3">
