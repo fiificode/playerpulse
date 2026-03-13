@@ -33,8 +33,3 @@ body {
     #020617;
   color: var(--color-foreground);
 }
-
-#__next {
-  min-height: 100%;
-}
-

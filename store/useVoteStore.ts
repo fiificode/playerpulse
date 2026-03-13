@@ -7,7 +7,6 @@ type VoteState = {
   selectedPlayerId: string | null;
   hasVoted: boolean;
   totalVotes: number;
-  voteInProgress: boolean;
   celebrationPlayerId: string | null;
   soundEnabled: boolean;
   weekDeadline: string;
@@ -37,7 +36,6 @@ export const useVoteStore = create<VoteStore>((set, get) => ({
   selectedPlayerId: null,
   hasVoted: false,
   totalVotes: 0,
-  voteInProgress: false,
   celebrationPlayerId: null,
   soundEnabled: true,
   weekDeadline: twoMinutesFromNow(),
@@ -59,7 +57,6 @@ export const useVoteStore = create<VoteStore>((set, get) => ({
         hasVoted: true,
         totalVotes: state.totalVotes + 1,
         celebrationPlayerId: playerId,
-        voteInProgress: false,
       };
     });
   },
@@ -85,4 +82,3 @@ export const useVoteStore = create<VoteStore>((set, get) => ({
       weekDeadline: payload.weekDeadline ?? state.weekDeadline,
     })),
 }));
-

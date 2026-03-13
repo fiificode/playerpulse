@@ -15,7 +15,6 @@ import { WinnerBanner } from "@/components/WinnerBanner";
 import { WinnerOverlay } from "@/components/WinnerOverlay";
 
 export default function Home() {
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const nomineesRef = useRef<HTMLDivElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [votingClosed, setVotingClosed] = useState(false);
@@ -107,7 +106,7 @@ export default function Home() {
       unsubscribe();
       window.removeEventListener("storage", onStorage);
     };
-  }, [hydrateFromStorage, players]);
+  }, [hydrateFromStorage]);
 
   useEffect(() => {
     if (phase !== "intro") return;
@@ -229,10 +228,7 @@ export default function Home() {
   );
 
   return (
-    <main
-      ref={containerRef}
-      className="relative min-h-screen w-full overflow-hidden bg-linear-to-b from-slate-950 via-slate-950 to-slate-950 pb-20 text-slate-50"
-    >
+    <main className="relative min-h-screen w-full overflow-hidden bg-linear-to-b from-slate-950 via-slate-950 to-slate-950 pb-20 text-slate-50">
       <AnimatedBackground intensity={crowdEnergy} />
 
       {votingClosed && currentLeader && showWinnerOverlay && (
