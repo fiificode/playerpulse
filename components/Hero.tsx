@@ -2,12 +2,15 @@
 
 import { motion } from "framer-motion";
 import { ArrowDownRight } from "lucide-react";
+import { useUiTick } from "./useUiTick";
 
 type HeroProps = {
   onStartVoting: () => void;
 };
 
 export function Hero({ onStartVoting }: HeroProps) {
+  const { playTick } = useUiTick();
+
   return (
     <section className="relative flex flex-col items-center justify-center gap-6 py-12 text-center md:py-20">
       <motion.h1
@@ -30,6 +33,8 @@ export function Hero({ onStartVoting }: HeroProps) {
       <motion.button
         type="button"
         onClick={onStartVoting}
+        onPointerDown={playTick}
+        onMouseEnter={playTick}
         className="group relative mt-2 inline-flex items-center gap-2 rounded-full border border-sky-400/70 bg-sky-500/20 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-sky-100 shadow-[0_0_25px_rgba(56,189,248,0.5)] transition hover:border-sky-300 hover:bg-sky-400/30 hover:shadow-[0_0_40px_rgba(56,189,248,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}

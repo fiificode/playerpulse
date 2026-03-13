@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Check, Sparkles } from "lucide-react";
+import { useUiTick } from "./useUiTick";
 
 type VoteButtonProps = {
   disabled?: boolean;
@@ -11,6 +12,7 @@ type VoteButtonProps = {
 
 export function VoteButton({ disabled, hasVoted, onClick }: VoteButtonProps) {
   const label = hasVoted ? "Voted" : "Vote";
+  const { playTick } = useUiTick();
 
   return (
     <motion.button
@@ -22,6 +24,8 @@ export function VoteButton({ disabled, hasVoted, onClick }: VoteButtonProps) {
       } ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
       whileTap={disabled ? undefined : { scale: 0.96 }}
       onClick={disabled ? undefined : onClick}
+      onPointerDown={disabled ? undefined : playTick}
+      onMouseEnter={disabled ? undefined : playTick}
       disabled={disabled}
       aria-pressed={hasVoted}
       aria-disabled={disabled}
@@ -35,4 +39,3 @@ export function VoteButton({ disabled, hasVoted, onClick }: VoteButtonProps) {
     </motion.button>
   );
 }
-

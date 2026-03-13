@@ -25,9 +25,9 @@ export function PlayerCard({
 }: PlayerCardProps) {
   return (
     <motion.article
-      className={`relative flex flex-col rounded-2xl border border-slate-700/70 bg-slate-900/80 p-4 shadow-[0_0_40px_rgba(15,23,42,0.9)] backdrop-blur-md transition-colors ${
+      className={`relative flex flex-col rounded-2xl border border-slate-700/70 bg-slate-900/80 p-4 shadow-[0_0_28px_rgba(15,23,42,0.7)] backdrop-blur-md transition-colors ${
         isSelected
-          ? "border-sky-400/80 shadow-[0_0_45px_rgba(56,189,248,0.8)]"
+          ? "border-sky-400/70 shadow-[0_0_28px_rgba(56,189,248,0.55)]"
           : "hover:border-indigo-400/70 hover:bg-slate-900"
       }`}
       initial={{ opacity: 0, y: 20 }}
@@ -38,7 +38,7 @@ export function PlayerCard({
     >
       {isCelebrating && (
         <motion.div
-          className="pointer-events-none absolute inset-0 -z-10 rounded-2xl bg-sky-500/30 blur-xl"
+          className="pointer-events-none absolute inset-0 -z-10 rounded-2xl bg-sky-500/20 blur-xl"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -46,7 +46,7 @@ export function PlayerCard({
         />
       )}
 
-      <div className="flex items-center gap-4">
+      <div className="grid grid-cols-[64px_1fr] items-start gap-4">
         <div className="relative h-16 w-16 overflow-hidden rounded-2xl border border-slate-600/70 bg-slate-800/80">
           <Image
             src={player.image}
@@ -56,8 +56,8 @@ export function PlayerCard({
             className="h-full w-full object-cover"
           />
         </div>
-        <div className="flex flex-1 flex-col gap-1">
-          <h3 className="text-base font-semibold text-slate-50">
+        <div className="flex min-h-[72px] flex-col gap-1">
+          <h3 className="min-h-[2.5rem] text-base font-semibold leading-tight text-slate-50">
             {player.name}
           </h3>
           <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
@@ -87,4 +87,3 @@ export function PlayerCard({
     </motion.article>
   );
 }
-

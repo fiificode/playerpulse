@@ -20,11 +20,12 @@ export default function Home() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [votingClosed, setVotingClosed] = useState(false);
   const [showWinnerOverlay, setShowWinnerOverlay] = useState(false);
-  const [phase, setPhase] = useState<"intro" | "voting" | "leaderboard">(
-    "intro",
-  );
+  const [phase, setPhase] = useState<
+    "intro" | "voting" | "submitted" | "leaderboard"
+  >("intro");
   const [introCount, setIntroCount] = useState(3);
   const [introReady, setIntroReady] = useState(false);
+  const [shakeIntro, setShakeIntro] = useState(false);
 
   const {
     players,
@@ -121,13 +122,27 @@ export default function Home() {
         clearInterval(id);
         setIntroCount(0);
         setIntroReady(true);
+        setShakeIntro(true);
+        if (soundEnabled && audioRef.current) {
+          audioRef.current.currentTime = 0;
+          audioRef.current.play().catch(() => {
+            // ignore playback errors
+          });
+        }
       } else {
         setIntroCount(count);
+        setShakeIntro(true);
       }
     }, 900);
 
     return () => clearInterval(id);
-  }, [phase]);
+  }, [phase, soundEnabled]);
+
+  useEffect(() => {
+    if (!shakeIntro) return;
+    const id = setTimeout(() => setShakeIntro(false), 240);
+    return () => clearTimeout(id);
+  }, [shakeIntro]);
 
   useEffect(() => {
     const deadlineMs = new Date(weekDeadline).getTime();
@@ -150,10 +165,23 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    if (!soundEnabled && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  }, [soundEnabled]);
+
+  useEffect(() => {
     if (phase === "voting" && hasVoted) {
-      setPhase("leaderboard");
+      setPhase("submitted");
     }
   }, [hasVoted, phase]);
+
+  useEffect(() => {
+    if (phase !== "submitted") return;
+    const id = setTimeout(() => setPhase("leaderboard"), 1400);
+    return () => clearTimeout(id);
+  }, [phase]);
 
   const handleVote = (playerId: string) => {
     if (hasVoted || votingClosed) return;
@@ -191,13 +219,21 @@ export default function Home() {
   );
 
   const currentLeader = sortedPlayers[0] ?? null;
+  const crowdEnergy = useMemo(
+    () => Math.min(1, totalVotes / 12),
+    [totalVotes],
+  );
+  const stageOrder = ["intro", "voting", "leaderboard"] as const;
+  const currentStageIndex = stageOrder.indexOf(
+    phase === "submitted" ? "leaderboard" : phase,
+  );
 
   return (
     <main
       ref={containerRef}
       className="relative min-h-screen w-full overflow-hidden bg-linear-to-b from-slate-950 via-slate-950 to-slate-950 pb-20 text-slate-50"
     >
-      <AnimatedBackground />
+      <AnimatedBackground intensity={crowdEnergy} />
 
       {votingClosed && currentLeader && showWinnerOverlay && (
         <WinnerOverlay
@@ -234,6 +270,26 @@ export default function Home() {
             </button>
           </div>
         </header>
+        <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+          {["Intro", "Voting", "Leaderboard"].map((label, index) => {
+            const isActive = index === currentStageIndex;
+            const isComplete = index < currentStageIndex;
+            return (
+              <span
+                key={label}
+                className={`rounded-full border px-3 py-1 transition ${
+                  isActive
+                    ? "border-sky-400/70 bg-sky-500/15 text-sky-200 shadow-[0_0_14px_rgba(56,189,248,0.6)]"
+                    : isComplete
+                      ? "border-emerald-400/60 bg-emerald-500/10 text-emerald-200/90"
+                      : "border-slate-800/80 bg-slate-950/60"
+                }`}
+              >
+                {label}
+              </span>
+            );
+          })}
+        </div>
 
         <AnimatePresence mode="wait">
           {phase === "intro" && (
@@ -252,7 +308,12 @@ export default function Home() {
                 className="text-7xl font-semibold text-sky-200 md:text-8xl"
                 key={`count-${introCount}`}
                 initial={{ scale: 0.6, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
+                animate={{
+                  scale: 1,
+                  opacity: 1,
+                  x: shakeIntro ? [0, -8, 8, -6, 6, 0] : 0,
+                  rotate: shakeIntro ? [0, -3, 3, -2, 2, 0] : 0,
+                }}
                 exit={{ scale: 1.2, opacity: 0 }}
                 transition={{ duration: 0.45, ease: "easeOut" }}
               >
@@ -288,9 +349,24 @@ export default function Home() {
             >
               <Hero onStartVoting={handleStartVoting} />
 
-              <section
+              <motion.section
                 ref={nomineesRef}
                 className="mt-4 flex flex-col gap-10 md:mt-2 md:flex-row"
+                animate={{
+                  boxShadow:
+                    !votingClosed && !hasVoted
+                      ? [
+                          "0 0 0 rgba(56,189,248,0)",
+                          "0 0 28px rgba(56,189,248,0.18)",
+                          "0 0 0 rgba(56,189,248,0)",
+                        ]
+                      : "0 0 0 rgba(56,189,248,0)",
+                }}
+                transition={{
+                  duration: 2.4,
+                  repeat: !votingClosed && !hasVoted ? Infinity : 0,
+                  ease: "easeInOut",
+                }}
               >
                 <div className="flex-1">
                   <div className="mb-4 flex items-center justify-between gap-2">
@@ -307,7 +383,7 @@ export default function Home() {
                       You can only vote once per session.
                     </p>
                   </div>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-2">
                     {players.map((player) => {
                       const percentage =
                         totalVotesForPercentages > 0
@@ -336,8 +412,47 @@ export default function Home() {
                     totalVotes={totalVotes}
                   />
                 </div>
-              </section>
+              </motion.section>
             </motion.div>
+          )}
+
+          {phase === "submitted" && (
+            <motion.section
+              key="submitted"
+              className="flex min-h-[50vh] flex-col items-center justify-center gap-6 text-center"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+            >
+              <motion.div
+                className="h-16 w-16 rounded-full border border-sky-400/70 bg-sky-500/20 shadow-[0_0_40px_rgba(56,189,248,0.7)]"
+                animate={{
+                  scale: [1, 1.1, 1],
+                  boxShadow: [
+                    "0 0 25px rgba(56,189,248,0.5)",
+                    "0 0 45px rgba(56,189,248,0.85)",
+                    "0 0 30px rgba(56,189,248,0.6)",
+                  ],
+                }}
+                transition={{
+                  duration: 0.8,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-400">
+                  Vote Submitted
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold text-slate-100">
+                  Charging the leaderboard...
+                </h2>
+                <p className="mt-2 text-sm text-slate-400">
+                  Get ready to see the updated rankings.
+                </p>
+              </div>
+            </motion.section>
           )}
 
           {phase === "leaderboard" && (

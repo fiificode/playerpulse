@@ -17,7 +17,17 @@ const blobs = [
   },
 ];
 
-export function AnimatedBackground() {
+type AnimatedBackgroundProps = {
+  intensity?: number;
+};
+
+export function AnimatedBackground({ intensity = 0 }: AnimatedBackgroundProps) {
+  const energy = Math.min(1, Math.max(0, intensity));
+  const opacityLow = 0.35 + 0.15 * energy;
+  const opacityHigh = 0.65 + 0.2 * energy;
+  const opacityMid = 0.45 + 0.15 * energy;
+  const scaleHigh = 1.05 + 0.08 * energy;
+
   return (
     <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
       {blobs.map((blob, index) => (
@@ -26,8 +36,8 @@ export function AnimatedBackground() {
           className={blob.className}
           initial={{ opacity: 0.6, scale: 0.9 }}
           animate={{
-            opacity: [0.4, 0.8, 0.5],
-            scale: [0.9, 1.1, 1],
+            opacity: [opacityLow, opacityHigh, opacityMid],
+            scale: [0.9, scaleHigh, 1],
             rotate: [0, 12, -8],
           }}
           transition={{
@@ -42,4 +52,3 @@ export function AnimatedBackground() {
     </div>
   );
 }
-

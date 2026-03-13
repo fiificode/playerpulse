@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import type { Player } from "@/types/player";
 import { Link2, Share2 } from "lucide-react";
+import { useUiTick } from "./useUiTick";
 
 type ShareWinnerProps = {
   totalVotes: number;
@@ -11,12 +12,45 @@ type ShareWinnerProps = {
 
 export function ShareWinner({ totalVotes, leader }: ShareWinnerProps) {
   const [copied, setCopied] = useState(false);
+  const [shareUnavailable, setShareUnavailable] = useState(false);
+  const { playTick } = useUiTick();
+
+  const copyToClipboard = useCallback(async (text: string) => {
+    if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1800);
+        return;
+      } catch {
+        // fall through to legacy copy
+      }
+    }
+
+    try {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "true");
+      textarea.style.position = "fixed";
+      textarea.style.top = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      window.prompt("Copy this link", text);
+    }
+  }, []);
 
   const handleShare = useCallback(async () => {
     const url = window.location.href;
 
     if (navigator.share && leader) {
       try {
+        setShareUnavailable(false);
         await navigator.share({
           title: "PlayerPulse – Player of the Week",
           text: `My pick for Player of the Week is ${leader.name}. Who are you backing?`,
@@ -24,18 +58,19 @@ export function ShareWinner({ totalVotes, leader }: ShareWinnerProps) {
         });
         return;
       } catch {
-        // fall back to copy
+        setShareUnavailable(true);
+        return;
       }
     }
 
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-    } catch {
-      setCopied(false);
-    }
+    setShareUnavailable(true);
   }, [leader]);
+
+  const handleCopy = useCallback(async () => {
+    const url = window.location.href;
+    setShareUnavailable(false);
+    await copyToClipboard(url);
+  }, [copyToClipboard]);
 
   if (!leader || totalVotes === 0) {
     return (
@@ -56,23 +91,35 @@ export function ShareWinner({ totalVotes, leader }: ShareWinnerProps) {
         <span className="font-semibold text-sky-200">{leader.votes}</span>{" "}
         votes. Send this link so your friends can weigh in.
       </p>
+      {shareUnavailable && (
+        <p className="mb-2 text-[11px] text-amber-200/90">
+          Native share isn’t available here. Use Copy link instead.
+        </p>
+      )}
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={handleShare}
+          onPointerDown={playTick}
+          onMouseEnter={playTick}
           className="inline-flex items-center gap-2 rounded-full bg-sky-500/30 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-sky-50 shadow-[0_0_26px_rgba(56,189,248,0.9)] transition hover:bg-sky-500/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
         >
           <Share2 className="h-3.5 w-3.5" />
           <span>Share</span>
         </button>
-        <div className="inline-flex items-center gap-1 rounded-full border border-slate-700/80 bg-slate-900/80 px-2 py-1 text-[11px] text-slate-300">
+        <button
+          type="button"
+          onClick={handleCopy}
+          onPointerDown={playTick}
+          onMouseEnter={playTick}
+          className="inline-flex items-center gap-1 rounded-full border border-slate-700/80 bg-slate-900/80 px-2 py-1 text-[11px] text-slate-300 transition hover:border-sky-400/60 hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+        >
           <Link2 className="h-3.5 w-3.5 text-slate-400" />
           <span className="truncate max-w-[140px] text-slate-400">
             {copied ? "Link copied!" : "Copy link"}
           </span>
-        </div>
+        </button>
       </div>
     </section>
   );
 }
-
