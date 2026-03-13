@@ -79,12 +79,14 @@ export default function Home() {
       totalVotes: number;
       weekDeadline: string;
     }) => {
-      if (writeHandleRef.current !== null) {
-        if ("cancelIdleCallback" in window) {
-          (window as Window & { cancelIdleCallback?: (id: number) => void })
-            .cancelIdleCallback?.(writeHandleRef.current);
+      const existingHandle = writeHandleRef.current;
+      if (existingHandle !== null) {
+        if (typeof (window as { cancelIdleCallback?: (id: number) => void })
+          .cancelIdleCallback === "function") {
+          (window as { cancelIdleCallback?: (id: number) => void })
+            .cancelIdleCallback?.(existingHandle);
         } else {
-          window.clearTimeout(writeHandleRef.current);
+          clearTimeout(existingHandle);
         }
       }
 
@@ -96,12 +98,11 @@ export default function Home() {
         }
       };
 
-      if ("requestIdleCallback" in window) {
-        writeHandleRef.current = (
-          window as Window & {
-            requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
-          }
-        ).requestIdleCallback?.(write, { timeout: 800 }) ?? null;
+      if (typeof (window as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number })
+        .requestIdleCallback === "function") {
+        writeHandleRef.current =
+          (window as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number })
+            .requestIdleCallback?.(write, { timeout: 800 }) ?? null;
       } else {
         writeHandleRef.current = window.setTimeout(write, 180);
       }
@@ -134,12 +135,14 @@ export default function Home() {
     return () => {
       unsubscribe();
       window.removeEventListener("storage", onStorage);
-      if (writeHandleRef.current !== null) {
-        if ("cancelIdleCallback" in window) {
-          (window as Window & { cancelIdleCallback?: (id: number) => void })
-            .cancelIdleCallback?.(writeHandleRef.current);
+      const handle = writeHandleRef.current;
+      if (handle !== null) {
+        if (typeof (window as { cancelIdleCallback?: (id: number) => void })
+          .cancelIdleCallback === "function") {
+          (window as { cancelIdleCallback?: (id: number) => void })
+            .cancelIdleCallback?.(handle);
         } else {
-          window.clearTimeout(writeHandleRef.current);
+          clearTimeout(handle);
         }
         writeHandleRef.current = null;
       }
