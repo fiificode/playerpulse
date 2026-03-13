@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 type CountdownTimerProps = {
   deadline: string;
+  active?: boolean;
 };
 
 type TimeLeft = {
@@ -26,16 +27,20 @@ function getTimeLeft(deadline: string): TimeLeft {
   return { days, hours, minutes, seconds };
 }
 
-export function CountdownTimer({ deadline }: CountdownTimerProps) {
+export function CountdownTimer({
+  deadline,
+  active = true,
+}: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => getTimeLeft(deadline));
 
   useEffect(() => {
+    if (!active) return;
     const id = setInterval(() => {
       setTimeLeft(getTimeLeft(deadline));
     }, 1000);
 
     return () => clearInterval(id);
-  }, [deadline]);
+  }, [active, deadline]);
 
   const { days, hours, minutes, seconds } = timeLeft;
 
@@ -50,4 +55,3 @@ export function CountdownTimer({ deadline }: CountdownTimerProps) {
     </div>
   );
 }
-

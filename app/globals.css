@@ -20,6 +20,7 @@ body {
 
 body {
   margin: 0;
+  font-family: var(--font-geist-sans);
   background: radial-gradient(
       circle at top,
       rgba(56, 189, 248, 0.18),

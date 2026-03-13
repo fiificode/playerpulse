@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 const blobs = [
   {
@@ -22,11 +23,24 @@ type AnimatedBackgroundProps = {
 };
 
 export function AnimatedBackground({ intensity = 0 }: AnimatedBackgroundProps) {
+  const prefersReducedMotion = useReducedMotion();
+  const [isVisible, setIsVisible] = useState(true);
   const energy = Math.min(1, Math.max(0, intensity));
   const opacityLow = 0.35 + 0.15 * energy;
   const opacityHigh = 0.65 + 0.2 * energy;
   const opacityMid = 0.45 + 0.15 * energy;
   const scaleHigh = 1.05 + 0.08 * energy;
+  const animateEnabled = !prefersReducedMotion && isVisible;
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const updateVisibility = () => {
+      setIsVisible(!document.hidden);
+    };
+    updateVisibility();
+    document.addEventListener("visibilitychange", updateVisibility);
+    return () => document.removeEventListener("visibilitychange", updateVisibility);
+  }, []);
 
   return (
     <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
@@ -35,18 +49,30 @@ export function AnimatedBackground({ intensity = 0 }: AnimatedBackgroundProps) {
           key={index}
           className={blob.className}
           initial={{ opacity: 0.6, scale: 0.9 }}
-          animate={{
-            opacity: [opacityLow, opacityHigh, opacityMid],
-            scale: [0.9, scaleHigh, 1],
-            rotate: [0, 12, -8],
-          }}
-          transition={{
-            duration: 18,
-            repeat: Infinity,
-            repeatType: "mirror",
-            ease: "easeInOut",
-            delay: index * 1.5,
-          }}
+          animate={
+            animateEnabled
+              ? {
+                  opacity: [opacityLow, opacityHigh, opacityMid],
+                  scale: [0.9, scaleHigh, 1],
+                  rotate: [0, 12, -8],
+                }
+              : {
+                  opacity: opacityMid,
+                  scale: 1,
+                  rotate: 0,
+                }
+          }
+          transition={
+            animateEnabled
+              ? {
+                  duration: 18,
+                  repeat: Infinity,
+                  repeatType: "mirror",
+                  ease: "easeInOut",
+                  delay: index * 1.5,
+                }
+              : { duration: 0 }
+          }
         />
       ))}
     </div>

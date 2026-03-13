@@ -17,6 +17,7 @@ import { WinnerOverlay } from "@/components/WinnerOverlay";
 export default function Home() {
   const nomineesRef = useRef<HTMLDivElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const writeHandleRef = useRef<number | null>(null);
   const [votingClosed, setVotingClosed] = useState(false);
   const [showWinnerOverlay, setShowWinnerOverlay] = useState(false);
   const [phase, setPhase] = useState<
@@ -73,17 +74,45 @@ export default function Home() {
       // ignore malformed storage
     }
 
+    const scheduleWrite = (snapshot: {
+      players: typeof players;
+      totalVotes: number;
+      weekDeadline: string;
+    }) => {
+      if (writeHandleRef.current !== null) {
+        if ("cancelIdleCallback" in window) {
+          (window as Window & { cancelIdleCallback?: (id: number) => void })
+            .cancelIdleCallback?.(writeHandleRef.current);
+        } else {
+          window.clearTimeout(writeHandleRef.current);
+        }
+      }
+
+      const write = () => {
+        try {
+          window.localStorage.setItem(storageKey, JSON.stringify(snapshot));
+        } catch {
+          // ignore write errors
+        }
+      };
+
+      if ("requestIdleCallback" in window) {
+        writeHandleRef.current = (
+          window as Window & {
+            requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+          }
+        ).requestIdleCallback?.(write, { timeout: 800 }) ?? null;
+      } else {
+        writeHandleRef.current = window.setTimeout(write, 180);
+      }
+    };
+
     const unsubscribe = useVoteStore.subscribe((state) => {
-      const snapshot = {
+      scheduleWrite({
         players: state.players,
         totalVotes: state.totalVotes,
         weekDeadline: state.weekDeadline,
-      };
-      try {
-        window.localStorage.setItem(storageKey, JSON.stringify(snapshot));
-      } catch {
-        // ignore write errors
-      }
+      });
     });
 
     const onStorage = (event: StorageEvent) => {
@@ -105,6 +134,15 @@ export default function Home() {
     return () => {
       unsubscribe();
       window.removeEventListener("storage", onStorage);
+      if (writeHandleRef.current !== null) {
+        if ("cancelIdleCallback" in window) {
+          (window as Window & { cancelIdleCallback?: (id: number) => void })
+            .cancelIdleCallback?.(writeHandleRef.current);
+        } else {
+          window.clearTimeout(writeHandleRef.current);
+        }
+        writeHandleRef.current = null;
+      }
     };
   }, [hydrateFromStorage]);
 
@@ -122,9 +160,10 @@ export default function Home() {
         setIntroCount(0);
         setIntroReady(true);
         setShakeIntro(true);
-        if (soundEnabled && audioRef.current) {
-          audioRef.current.currentTime = 0;
-          audioRef.current.play().catch(() => {
+        const audio = getCrowdAudio();
+        if (soundEnabled && audio) {
+          audio.currentTime = 0;
+          audio.play().catch(() => {
             // ignore playback errors
           });
         }
@@ -158,15 +197,23 @@ export default function Home() {
     return () => clearInterval(id);
   }, [weekDeadline]);
 
+  const getCrowdAudio = () => {
+    if (typeof window === "undefined") return null;
+    if (!audioRef.current) {
+      audioRef.current = new Audio("/audio/crowd-cheer.mp3");
+    }
+    return audioRef.current;
+  };
+
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    audioRef.current = new Audio("/audio/crowd-cheer.mp3");
+    getCrowdAudio();
   }, []);
 
   useEffect(() => {
-    if (!soundEnabled && audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+    const audio = getCrowdAudio();
+    if (!soundEnabled && audio) {
+      audio.pause();
+      audio.currentTime = 0;
     }
   }, [soundEnabled]);
 
@@ -186,9 +233,10 @@ export default function Home() {
     if (hasVoted || votingClosed) return;
     vote(playerId);
 
-    if (soundEnabled && audioRef.current) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(() => {
+    const audio = getCrowdAudio();
+    if (soundEnabled && audio) {
+      audio.currentTime = 0;
+      audio.play().catch(() => {
         // ignore playback errors (e.g. autoplay restrictions)
       });
     }
@@ -249,7 +297,10 @@ export default function Home() {
             </h1>
           </div>
           <div className="flex items-center gap-3">
-            <CountdownTimer deadline={weekDeadline} />
+            <CountdownTimer
+              deadline={weekDeadline}
+              active={!votingClosed && phase !== "leaderboard" && phase !== "submitted"}
+            />
             <button
               type="button"
               onClick={toggleSound}
