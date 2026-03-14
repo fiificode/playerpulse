@@ -337,6 +337,9 @@ export default function Home() {
             <h1 className="text-lg font-semibold text-slate-100">
               Player of the Week
             </h1>
+            <p className="mt-1 text-xs text-slate-400">
+              Independent fan vote • Updated live every round
+            </p>
           </div>
           <div className="flex items-center gap-3">
             <CountdownTimer
@@ -422,6 +425,11 @@ export default function Home() {
                   : "Pick a standout player, cast one vote, and track the live leaderboard in real time."}
               </p>
               <div className="flex flex-col items-center gap-2 text-xs text-slate-400">
+                {!votingClosed && (
+                  <span className="rounded-full border border-emerald-400/60 bg-emerald-500/10 px-3 py-1 text-emerald-200">
+                    Vote to enter the monthly ticket raffle
+                  </span>
+                )}
                 <span className="rounded-full border border-slate-800/80 bg-slate-950/70 px-3 py-1">
                   1 vote per session • Live leaderboard • Rewards on the line
                 </span>
