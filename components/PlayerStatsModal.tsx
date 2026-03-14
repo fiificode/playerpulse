@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion } from "framer-motion";
-import type { Player } from "@/types/player";
 import { X } from "lucide-react";
+import type { Player } from "@/types/player";
 
 type PlayerStatsModalProps = {
   player: Player;
@@ -23,15 +24,25 @@ const statLabels: Array<{
 ];
 
 export function PlayerStatsModal({ player, onClose }: PlayerStatsModalProps) {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
   return (
     <div
       className="fixed inset-0 z-[70] flex items-center justify-center bg-black/65 px-4 backdrop-blur-md"
+      onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label={`${player.name} stats`}
     >
       <motion.div
         className="relative w-full max-w-xl rounded-3xl border border-slate-700/80 bg-slate-950/95 p-6 shadow-[0_0_40px_rgba(15,23,42,0.95)]"
+        onClick={(event) => event.stopPropagation()}
         initial={{ opacity: 0, scale: 0.94, y: 18 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.98, y: 6 }}
