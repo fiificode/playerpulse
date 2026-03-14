@@ -13,6 +13,7 @@ import { CountdownTimer } from "@/components/CountdownTimer";
 import { ShareWinner } from "@/components/ShareWinner";
 import { WinnerBanner } from "@/components/WinnerBanner";
 import { WinnerOverlay } from "@/components/WinnerOverlay";
+import { PlayerStatsModal } from "@/components/PlayerStatsModal";
 
 export default function Home() {
   const nomineesRef = useRef<HTMLDivElement | null>(null);
@@ -20,6 +21,7 @@ export default function Home() {
   const writeHandleRef = useRef<number | null>(null);
   const [votingClosed, setVotingClosed] = useState(false);
   const [showWinnerOverlay, setShowWinnerOverlay] = useState(false);
+  const [activeStatsPlayer, setActiveStatsPlayer] = useState<string | null>(null);
   const [phase, setPhase] = useState<
     "intro" | "voting" | "submitted" | "leaderboard"
   >("intro");
@@ -204,6 +206,7 @@ export default function Home() {
     if (typeof window === "undefined") return null;
     if (!audioRef.current) {
       audioRef.current = new Audio("/audio/crowd-cheer.mp3");
+      audioRef.current.preload = "auto";
     }
     return audioRef.current;
   };
@@ -260,6 +263,10 @@ export default function Home() {
     });
   };
 
+  const handleToggleSound = () => {
+    toggleSound();
+  };
+
   const totalVotesForPercentages = useMemo(
     () =>
       totalVotes > 0
@@ -288,6 +295,19 @@ export default function Home() {
           onClose={() => setShowWinnerOverlay(false)}
         />
       )}
+      {activeStatsPlayer &&
+        (() => {
+          const statsPlayer = players.find(
+            (player) => player.id === activeStatsPlayer,
+          );
+          if (!statsPlayer) return null;
+          return (
+            <PlayerStatsModal
+              player={statsPlayer}
+              onClose={() => setActiveStatsPlayer(null)}
+            />
+          );
+        })()}
 
       <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pt-8 sm:px-6 md:px-8 md:pt-12">
         <header className="flex items-center justify-between gap-3">
@@ -306,7 +326,7 @@ export default function Home() {
             />
             <button
               type="button"
-              onClick={toggleSound}
+              onClick={handleToggleSound}
               className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-700/80 bg-slate-900/80 text-slate-200 shadow-[0_0_16px_rgba(15,23,42,0.8)] transition hover:border-sky-400/80 hover:text-sky-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
               aria-label={
                 soundEnabled ? "Mute crowd audio" : "Unmute crowd audio"
@@ -374,17 +394,29 @@ export default function Home() {
                 watch the leaderboard evolve live.
               </p>
               {introReady && (
-                <motion.button
-                  type="button"
-                  onClick={handleStartVoting}
-                  className="group relative mt-2 inline-flex items-center gap-2 rounded-full border border-sky-400/70 bg-sky-500/20 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-sky-100 shadow-[0_0_25px_rgba(56,189,248,0.5)] transition hover:border-sky-300 hover:bg-sky-400/30 hover:shadow-[0_0_40px_rgba(56,189,248,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
-                >
-                  <span>Start Voting</span>
-                  <span className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-sky-500/40 blur-xl" />
-                </motion.button>
+                <div className="mt-2 flex flex-col items-center gap-3 sm:flex-row">
+                  <motion.button
+                    type="button"
+                    onClick={handleStartVoting}
+                    className="group relative inline-flex items-center gap-2 rounded-full border border-sky-400/70 bg-sky-500/20 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-sky-100 shadow-[0_0_25px_rgba(56,189,248,0.5)] transition hover:border-sky-300 hover:bg-sky-400/30 hover:shadow-[0_0_40px_rgba(56,189,248,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                  >
+                    <span>Start Voting</span>
+                    <span className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-sky-500/40 blur-xl" />
+                  </motion.button>
+                  <motion.button
+                    type="button"
+                    onClick={() => setPhase("leaderboard")}
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-700/80 bg-slate-950/70 px-6 py-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-200 transition hover:border-sky-400/70 hover:text-sky-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, ease: "easeOut", delay: 0.05 }}
+                  >
+                    View Leaderboard
+                  </motion.button>
+                </div>
               )}
             </motion.section>
           )}
@@ -450,6 +482,7 @@ export default function Home() {
                           isDisabled={hasVoted || votingClosed}
                           isCelebrating={celebrationPlayerId === player.id}
                           onVote={() => handleVote(player.id)}
+                          onStats={() => setActiveStatsPlayer(player.id)}
                         />
                       );
                     })}
@@ -515,6 +548,25 @@ export default function Home() {
               transition={{ duration: 0.45, ease: "easeOut" }}
             >
               <div className="space-y-6">
+                {!votingClosed && !hasVoted && (
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-slate-800/80 bg-slate-950/70 px-5 py-4 shadow-[0_0_35px_rgba(15,23,42,0.95)]">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
+                        Voting open
+                      </p>
+                      <p className="mt-1 text-sm text-slate-300">
+                        Jump back in to make your pick.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleStartVoting}
+                      className="inline-flex items-center justify-center rounded-full border border-sky-400/70 bg-sky-500/20 px-5 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-sky-100 transition hover:border-sky-300 hover:bg-sky-400/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                    >
+                      Back to Voting
+                    </button>
+                  </div>
+                )}
                 {votingClosed && currentLeader ? (
                   <WinnerBanner winner={currentLeader} />
                 ) : (
@@ -525,8 +577,109 @@ export default function Home() {
                   />
                 )}
                 <ShareWinner totalVotes={totalVotes} leader={currentLeader} />
+
+                <section className="rounded-3xl border border-slate-800/80 bg-slate-950/80 p-5 shadow-[0_0_45px_rgba(15,23,42,1)] backdrop-blur-xl">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
+                        Weekly Raffle
+                      </p>
+                      <h3 className="mt-1 text-lg font-semibold text-slate-100">
+                        Pick the winner, win tickets
+                      </h3>
+                    </div>
+                    <span className="rounded-full border border-emerald-400/60 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-200">
+                      New
+                    </span>
+                  </div>
+                  <p className="mt-3 text-sm text-slate-400">
+                    If your choice wins, you&apos;re entered into a raffle for a
+                    pair of matchday tickets. Winners announced monthly.
+                  </p>
+                </section>
+                <section className="rounded-3xl border border-slate-800/80 bg-slate-950/70 p-5 shadow-[0_0_40px_rgba(15,23,42,0.95)]">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-300">
+                      Rewards Won
+                    </h3>
+                    <span className="text-xs text-slate-500">Last 4 months</span>
+                  </div>
+                  <div className="space-y-3">
+                    {[
+                      { month: "February", reward: "2x VIP tickets" },
+                      { month: "January", reward: "Signed jersey raffle" },
+                      { month: "December", reward: "Matchday hospitality pass" },
+                      { month: "November", reward: "Training ground tour" },
+                    ].map((item) => (
+                      <div
+                        key={item.month}
+                        className="flex items-center justify-between rounded-2xl border border-slate-800/80 bg-slate-900/60 px-4 py-3 text-sm"
+                      >
+                        <span className="text-slate-200">{item.month}</span>
+                        <span className="text-slate-400">{item.reward}</span>
+                      </div>
+                    ))}
+                  </div>
+                </section>
               </div>
-              <Leaderboard players={sortedPlayers} totalVotes={totalVotes} />
+              <div className="space-y-6">
+                <Leaderboard players={sortedPlayers} totalVotes={totalVotes} />
+                <section className="rounded-3xl border border-slate-800/80 bg-slate-950/80 p-5 shadow-[0_0_45px_rgba(15,23,42,1)] backdrop-blur-xl">
+                  <div className="mb-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
+                      Fan Level
+                    </p>
+                    <h3 className="mt-1 text-lg font-semibold text-slate-100">
+                      Club Captain
+                    </h3>
+                    <p className="mt-1 text-sm text-slate-400">
+                      You&apos;re 72% toward the next tier.
+                    </p>
+                  </div>
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800">
+                    <div className="h-full w-[72%] rounded-full bg-linear-to-r from-sky-400 via-indigo-400 to-purple-400" />
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {["Scout", "Captain", "Tactician"].map((badge) => (
+                      <span
+                        key={badge}
+                        className="rounded-full border border-slate-700/80 bg-slate-900/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-200"
+                      >
+                        {badge}
+                      </span>
+                    ))}
+                  </div>
+                </section>
+                <section className="rounded-3xl border border-slate-800/80 bg-slate-950/70 p-5 shadow-[0_0_40px_rgba(15,23,42,0.95)]">
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-300">
+                    Momentum
+                  </h3>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-2xl border border-slate-800/80 bg-slate-900/70 px-4 py-4">
+                      <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+                        Streak
+                      </p>
+                      <p className="mt-2 text-lg font-semibold text-sky-200">
+                        2 weeks active
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        Keep voting to boost rewards.
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-slate-800/80 bg-slate-900/70 px-4 py-4">
+                      <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+                        XP Earned
+                      </p>
+                      <p className="mt-2 text-lg font-semibold text-indigo-200">
+                        +180 XP
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        Weekly bonus for voting early.
+                      </p>
+                    </div>
+                  </div>
+                </section>
+              </div>
             </motion.section>
           )}
         </AnimatePresence>

@@ -13,6 +13,7 @@ type PlayerCardProps = {
   isDisabled: boolean;
   isCelebrating: boolean;
   onVote: () => void;
+  onStats: () => void;
 };
 
 export function PlayerCard({
@@ -22,6 +23,7 @@ export function PlayerCard({
   isDisabled,
   isCelebrating,
   onVote,
+  onStats,
 }: PlayerCardProps) {
   return (
     <motion.article
@@ -77,12 +79,19 @@ export function PlayerCard({
 
       <ProgressBar value={percentage} />
 
-      <div className="mt-4">
+      <div className="mt-4 flex items-center gap-2">
         <VoteButton
           hasVoted={isSelected}
           disabled={isDisabled && !isSelected}
           onClick={onVote}
         />
+        <button
+          type="button"
+          onClick={onStats}
+          className="inline-flex h-10 flex-1 items-center justify-center rounded-full border border-slate-700/80 bg-slate-950/70 px-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 transition hover:border-sky-400/70 hover:text-sky-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+        >
+          Stats
+        </button>
       </div>
     </motion.article>
   );

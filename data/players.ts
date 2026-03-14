@@ -8,6 +8,14 @@ export const players: Player[] = [
     position: "ST",
     image: "/assets/players/haaland.jpg",
     votes: 0,
+    stats: {
+      goals: 4,
+      assists: 1,
+      keyPasses: 6,
+      shotsOnTarget: 9,
+      passAccuracy: 78,
+      tackles: 2,
+    },
   },
   {
     id: "salah",
@@ -16,6 +24,14 @@ export const players: Player[] = [
     position: "RW",
     image: "/assets/players/salah.jpg",
     votes: 0,
+    stats: {
+      goals: 3,
+      assists: 3,
+      keyPasses: 11,
+      shotsOnTarget: 7,
+      passAccuracy: 84,
+      tackles: 4,
+    },
   },
   {
     id: "odegaard",
@@ -24,6 +40,14 @@ export const players: Player[] = [
     position: "AM",
     image: "/assets/players/odegaard.jpg",
     votes: 0,
+    stats: {
+      goals: 2,
+      assists: 4,
+      keyPasses: 14,
+      shotsOnTarget: 5,
+      passAccuracy: 90,
+      tackles: 6,
+    },
   },
   {
     id: "bruno",
@@ -32,6 +56,14 @@ export const players: Player[] = [
     position: "CM",
     image: "/assets/players/bruno.jpg",
     votes: 0,
+    stats: {
+      goals: 2,
+      assists: 5,
+      keyPasses: 16,
+      shotsOnTarget: 4,
+      passAccuracy: 86,
+      tackles: 5,
+    },
   },
   {
     id: "son",
@@ -40,6 +72,14 @@ export const players: Player[] = [
     position: "LW",
     image: "/assets/players/son.jpg",
     votes: 0,
+    stats: {
+      goals: 3,
+      assists: 2,
+      keyPasses: 8,
+      shotsOnTarget: 6,
+      passAccuracy: 82,
+      tackles: 3,
+    },
   },
   {
     id: "saka",
@@ -48,6 +88,14 @@ export const players: Player[] = [
     position: "RW",
     image: "/assets/players/saka.jpg",
     votes: 0,
+    stats: {
+      goals: 2,
+      assists: 3,
+      keyPasses: 10,
+      shotsOnTarget: 5,
+      passAccuracy: 88,
+      tackles: 4,
+    },
   },
   {
     id: "palmer",
@@ -56,6 +104,14 @@ export const players: Player[] = [
     position: "AM",
     image: "/assets/players/palmer.jpg",
     votes: 0,
+    stats: {
+      goals: 2,
+      assists: 2,
+      keyPasses: 9,
+      shotsOnTarget: 5,
+      passAccuracy: 85,
+      tackles: 3,
+    },
   },
   {
     id: "van-dijk",
@@ -64,5 +120,13 @@ export const players: Player[] = [
     position: "CB",
     image: "/assets/players/van-dijk.jpg",
     votes: 0,
+    stats: {
+      goals: 1,
+      assists: 1,
+      keyPasses: 4,
+      shotsOnTarget: 2,
+      passAccuracy: 91,
+      tackles: 8,
+    },
   },
 ];

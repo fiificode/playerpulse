@@ -13,7 +13,7 @@ export function WinnerBanner({ winner }: WinnerBannerProps) {
   return (
     <section className="relative overflow-hidden rounded-3xl border border-amber-400/80 bg-linear-to-br from-amber-500/20 via-slate-950 to-slate-950 p-5 shadow-[0_0_50px_rgba(251,191,36,0.9)] backdrop-blur-xl">
       <div className="pointer-events-none absolute inset-0">
-        {Array.from({ length: 18 }).map((_, index) => (
+        {Array.from({ length: 22 }).map((_, index) => (
           <motion.span
             key={index}
             className="absolute h-1.5 w-1.5 rounded-full"
@@ -27,13 +27,13 @@ export function WinnerBanner({ winner }: WinnerBannerProps) {
               scale: 0.7,
             }}
             animate={{
-              y: [ -20, 120 ],
+              y: [-20, 95],
               opacity: [0, 1, 0],
               scale: [0.7, 1, 0.7],
             }}
             transition={{
-              duration: 2.4,
-              delay: index * 0.06,
+              duration: 1.35,
+              delay: index * 0.035,
               repeat: Infinity,
               repeatType: "loop",
               ease: "easeOut",
@@ -65,4 +65,3 @@ export function WinnerBanner({ winner }: WinnerBannerProps) {
     </section>
   );
 }
-
