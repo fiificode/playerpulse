@@ -31,9 +31,17 @@ export function CountdownTimer({
   deadline,
   active = true,
 }: CountdownTimerProps) {
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => getTimeLeft(deadline));
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+    setTimeLeft(getTimeLeft(deadline));
     if (!active) return;
     const id = setInterval(() => {
       setTimeLeft(getTimeLeft(deadline));
@@ -50,7 +58,7 @@ export function CountdownTimer({
         Ends in
       </span>
       <span className="tabular-nums text-sky-300">
-        {days}d {hours}h {minutes}m {seconds}s
+        {mounted ? `${days}d ${hours}h ${minutes}m ${seconds}s` : "—"}
       </span>
     </div>
   );
