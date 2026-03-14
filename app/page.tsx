@@ -376,7 +376,7 @@ export default function Home() {
               </p>
               <motion.div
                 className="text-7xl font-semibold text-sky-200 md:text-8xl"
-                key={`count-${introCount}`}
+                key={votingClosed ? "closed" : `count-${introCount}`}
                 initial={{ scale: 0.6, opacity: 0 }}
                 animate={{
                   scale: 1,
@@ -387,25 +387,36 @@ export default function Home() {
                 exit={{ scale: 1.2, opacity: 0 }}
                 transition={{ duration: 0.45, ease: "easeOut" }}
               >
-                {introCount > 0 ? introCount : "GO"}
+                {votingClosed ? "Votes ended" : introCount > 0 ? introCount : "GO"}
               </motion.div>
               <p className="max-w-lg text-balance text-sm text-slate-400 md:text-base">
-                Get ready to crown the Player of the Week. Cast one vote and
-                watch the leaderboard evolve live.
+                {votingClosed
+                  ? "Voting has closed for this round. View the final leaderboard and see who took the crown."
+                  : "Pick a standout player, cast one vote, and track the live leaderboard in real time."}
               </p>
+              <div className="flex flex-col items-center gap-2 text-xs text-slate-400">
+                <span className="rounded-full border border-slate-800/80 bg-slate-950/70 px-3 py-1">
+                  1 vote per session • Live leaderboard • Rewards on the line
+                </span>
+                <span className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
+                  Start voting or view the leaderboard
+                </span>
+              </div>
               {introReady && (
                 <div className="mt-2 flex flex-col items-center gap-3 sm:flex-row">
-                  <motion.button
-                    type="button"
-                    onClick={handleStartVoting}
-                    className="group relative inline-flex items-center gap-2 rounded-full border border-sky-400/70 bg-sky-500/20 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-sky-100 shadow-[0_0_25px_rgba(56,189,248,0.5)] transition hover:border-sky-300 hover:bg-sky-400/30 hover:shadow-[0_0_40px_rgba(56,189,248,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, ease: "easeOut" }}
-                  >
-                    <span>Start Voting</span>
-                    <span className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-sky-500/40 blur-xl" />
-                  </motion.button>
+                  {!votingClosed && (
+                    <motion.button
+                      type="button"
+                      onClick={handleStartVoting}
+                      className="group relative inline-flex items-center gap-2 rounded-full border border-sky-400/70 bg-sky-500/20 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-sky-100 shadow-[0_0_25px_rgba(56,189,248,0.5)] transition hover:border-sky-300 hover:bg-sky-400/30 hover:shadow-[0_0_40px_rgba(56,189,248,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                    >
+                      <span>Start Voting</span>
+                      <span className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-sky-500/40 blur-xl" />
+                    </motion.button>
+                  )}
                   <motion.button
                     type="button"
                     onClick={() => setPhase("leaderboard")}
