@@ -21,7 +21,9 @@ export default function Home() {
   const writeHandleRef = useRef<number | null>(null);
   const [votingClosed, setVotingClosed] = useState(false);
   const [showWinnerOverlay, setShowWinnerOverlay] = useState(false);
-  const [activeStatsPlayer, setActiveStatsPlayer] = useState<string | null>(null);
+  const [activeStatsPlayer, setActiveStatsPlayer] = useState<string | null>(
+    null,
+  );
   const [phase, setPhase] = useState<
     "intro" | "voting" | "submitted" | "leaderboard"
   >("intro");
@@ -83,10 +85,13 @@ export default function Home() {
     }) => {
       const existingHandle = writeHandleRef.current;
       if (existingHandle !== null) {
-        if (typeof (window as { cancelIdleCallback?: (id: number) => void })
-          .cancelIdleCallback === "function") {
-          (window as { cancelIdleCallback?: (id: number) => void })
-            .cancelIdleCallback?.(existingHandle);
+        if (
+          typeof (window as { cancelIdleCallback?: (id: number) => void })
+            .cancelIdleCallback === "function"
+        ) {
+          (
+            window as { cancelIdleCallback?: (id: number) => void }
+          ).cancelIdleCallback?.(existingHandle);
         } else {
           clearTimeout(existingHandle);
         }
@@ -100,11 +105,25 @@ export default function Home() {
         }
       };
 
-      if (typeof (window as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number })
-        .requestIdleCallback === "function") {
+      if (
+        typeof (
+          window as {
+            requestIdleCallback?: (
+              cb: () => void,
+              opts?: { timeout: number },
+            ) => number;
+          }
+        ).requestIdleCallback === "function"
+      ) {
         writeHandleRef.current =
-          (window as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number })
-            .requestIdleCallback?.(write, { timeout: 800 }) ?? null;
+          (
+            window as {
+              requestIdleCallback?: (
+                cb: () => void,
+                opts?: { timeout: number },
+              ) => number;
+            }
+          ).requestIdleCallback?.(write, { timeout: 800 }) ?? null;
       } else {
         writeHandleRef.current = window.setTimeout(write, 180);
       }
@@ -139,10 +158,13 @@ export default function Home() {
       window.removeEventListener("storage", onStorage);
       const handle = writeHandleRef.current;
       if (handle !== null) {
-        if (typeof (window as { cancelIdleCallback?: (id: number) => void })
-          .cancelIdleCallback === "function") {
-          (window as { cancelIdleCallback?: (id: number) => void })
-            .cancelIdleCallback?.(handle);
+        if (
+          typeof (window as { cancelIdleCallback?: (id: number) => void })
+            .cancelIdleCallback === "function"
+        ) {
+          (
+            window as { cancelIdleCallback?: (id: number) => void }
+          ).cancelIdleCallback?.(handle);
         } else {
           clearTimeout(handle);
         }
@@ -276,10 +298,7 @@ export default function Home() {
   );
 
   const currentLeader = sortedPlayers[0] ?? null;
-  const crowdEnergy = useMemo(
-    () => Math.min(1, totalVotes / 12),
-    [totalVotes],
-  );
+  const crowdEnergy = useMemo(() => Math.min(1, totalVotes / 12), [totalVotes]);
   const stageOrder = ["intro", "voting", "leaderboard"] as const;
   const currentStageIndex = stageOrder.indexOf(
     phase === "submitted" ? "leaderboard" : phase,
@@ -322,7 +341,11 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <CountdownTimer
               deadline={weekDeadline}
-              active={!votingClosed && phase !== "leaderboard" && phase !== "submitted"}
+              active={
+                !votingClosed &&
+                phase !== "leaderboard" &&
+                phase !== "submitted"
+              }
             />
             <button
               type="button"
@@ -387,7 +410,11 @@ export default function Home() {
                 exit={{ scale: 1.2, opacity: 0 }}
                 transition={{ duration: 0.45, ease: "easeOut" }}
               >
-                {votingClosed ? "Votes ended" : introCount > 0 ? introCount : "GO"}
+                {votingClosed
+                  ? "Votes ended"
+                  : introCount > 0
+                    ? introCount
+                    : "GO"}
               </motion.div>
               <p className="max-w-lg text-balance text-sm text-slate-400 md:text-base">
                 {votingClosed
@@ -399,7 +426,9 @@ export default function Home() {
                   1 vote per session • Live leaderboard • Rewards on the line
                 </span>
                 <span className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
-                  Start voting or view the leaderboard
+                  {votingClosed
+                    ? "View the final leaderboard"
+                    : "Start voting or view the leaderboard"}
                 </span>
               </div>
               {introReady && (
@@ -613,13 +642,18 @@ export default function Home() {
                     <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-300">
                       Rewards Won
                     </h3>
-                    <span className="text-xs text-slate-500">Last 4 months</span>
+                    <span className="text-xs text-slate-500">
+                      Last 4 months
+                    </span>
                   </div>
                   <div className="space-y-3">
                     {[
                       { month: "February", reward: "2x VIP tickets" },
                       { month: "January", reward: "Signed jersey raffle" },
-                      { month: "December", reward: "Matchday hospitality pass" },
+                      {
+                        month: "December",
+                        reward: "Matchday hospitality pass",
+                      },
                       { month: "November", reward: "Training ground tour" },
                     ].map((item) => (
                       <div
