@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
 import { Volume2, VolumeX } from "lucide-react";
 import { Hero } from "@/components/Hero";
 import { PlayerCard } from "@/components/PlayerCard";
@@ -443,6 +444,32 @@ export default function Home() {
                   ? "Voting has closed for this round. View the final leaderboard and see who took the crown."
                   : "Pick a standout player, cast one vote, and track the live leaderboard in real time."}
               </p>
+              {!votingClosed && (
+                <p className="max-w-2xl text-balance text-sm text-slate-400 md:text-base">
+                  PlayerPulse lets fans vote for Player of the Week, earn XP for
+                  participating, and climb the fan leaderboard. You gain XP by
+                  voting, returning on matchdays, and jumping into interactive
+                  moments across the experience. When the timer ends, voting
+                  closes and the winning player is revealed, while fan rankings
+                  continue to update with engagement. Active fans are entered
+                  into monthly prize draws.
+                </p>
+              )}
+              <div className="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-slate-800/80 bg-slate-950/60 shadow-[0_0_45px_rgba(15,23,42,0.9)]">
+                <div className="absolute inset-0 bg-linear-to-br from-sky-500/10 via-transparent to-indigo-500/10" />
+                <Image
+                  src="/assets/players/haaland.jpg"
+                  alt="Matchday spotlight"
+                  width={960}
+                  height={540}
+                  className="relative h-48 w-full object-cover sm:h-60"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+                <div className="absolute bottom-4 left-4 rounded-full border border-slate-700/80 bg-slate-950/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-200">
+                  Matchday Spotlight
+                </div>
+              </div>
               <div className="flex flex-col items-center gap-2 text-xs text-slate-400">
                 {!votingClosed && (
                   <span className="rounded-full border border-emerald-400/60 bg-emerald-500/10 px-3 py-1 text-emerald-200">
