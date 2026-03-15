@@ -317,7 +317,7 @@ export default function Home() {
         })()}
 
       <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pt-8 sm:px-6 md:px-8 md:pt-12">
-        <header className="flex items-center justify-between gap-3">
+        <header className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-300/80">
               PlayerPulse
@@ -329,7 +329,7 @@ export default function Home() {
               Independent fan vote • Updated live every round
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto sm:flex-nowrap sm:justify-end">
             <CountdownTimer
               deadline={weekDeadline}
               active={
