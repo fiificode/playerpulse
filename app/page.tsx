@@ -238,6 +238,12 @@ export default function Home() {
     return () => clearTimeout(id);
   }, [phase]);
 
+  useEffect(() => {
+    if (phase === "leaderboard") {
+      setLeaderboardMode("fans");
+    }
+  }, [phase]);
+
   const handleVote = (playerId: string) => {
     if (hasVoted || votingClosed) return;
     vote(playerId);
