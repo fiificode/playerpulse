@@ -3,7 +3,17 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { Volume2, VolumeX } from "lucide-react";
+import {
+  Clock,
+  Flame,
+  Play,
+  Share2,
+  Smile,
+  Sparkles,
+  Trophy,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import { Hero } from "@/components/Hero";
 import { PlayerCard } from "@/components/PlayerCard";
 import { Leaderboard } from "@/components/Leaderboard";
@@ -276,6 +286,16 @@ export default function Home() {
     toggleSound();
   };
 
+  const handleXpAction = (action: "voting" | "leaderboard" | "highlights" | "rewards") => {
+    setPhase(action);
+    if (action === "leaderboard") {
+      setLeaderboardMode("fans");
+    }
+    if (action === "highlights") {
+      setLeaderboardMode("highlights");
+    }
+  };
+
   const totalVotesForPercentages = useMemo(
     () =>
       totalVotes > 0
@@ -299,7 +319,7 @@ export default function Home() {
   );
 
   return (
-    <main className="relative min-h-screen w-full overflow-hidden bg-linear-to-b from-slate-950 via-slate-950 to-slate-950 pb-20 text-slate-50">
+    <main className="relative min-h-screen w-full overflow-hidden bg-transparent pb-20 text-slate-50">
       <AnimatedBackground intensity={crowdEnergy} />
 
       {votingClosed && currentLeader && showWinnerOverlay && (
@@ -414,82 +434,302 @@ export default function Home() {
               exit={{ opacity: 0, y: -30 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
             >
-              <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-400">
-                Matchday Voting
-              </p>
-              <motion.div
-                className="text-4xl font-semibold text-sky-200 md:text-6xl"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, ease: "easeOut" }}
-              >
-                {votingClosed ? "Votes ended" : "Cast your vote"}
-              </motion.div>
-              <p className="max-w-lg text-balance text-sm text-slate-400 md:text-base">
-                {votingClosed
-                  ? "Voting has closed for this round. View the final leaderboard and see who took the crown."
-                  : "Pick a standout player, cast one vote, and track the live leaderboard in real time."}
-              </p>
-              <button
-                type="button"
-                onClick={() => setPhase("spotlight")}
-                className="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-slate-800/80 bg-slate-950/60 text-left shadow-[0_0_45px_rgba(15,23,42,0.9)] transition hover:border-sky-400/60"
-              >
-                <div className="absolute inset-0 bg-linear-to-br from-sky-500/10 via-transparent to-indigo-500/10" />
-                <Image
-                  src="/assets/players/haaland.jpg"
-                  alt="Matchday spotlight"
-                  width={960}
-                  height={540}
-                  className="relative h-48 w-full object-cover sm:h-60"
-                  priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
-                <div className="absolute bottom-4 left-4 cursor-pointer rounded-full border border-slate-700/80 bg-slate-950/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-200">
-                  Matchday Spotlight
-                </div>
-              </button>
-              <div className="grid w-full max-w-3xl gap-4 text-left sm:grid-cols-2">
-                <section className="rounded-2xl border border-slate-800/80 bg-slate-950/70 p-4 shadow-[0_0_30px_rgba(15,23,42,0.9)]">
-                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
+              <div className="relative w-full overflow-hidden rounded-3xl shadow-[0_0_45px_rgba(15,23,42,0.9)]">
+                <div className="relative space-y-8 text-left">
+                <section>
+                  <p className="text-sm font-semibold uppercase tracking-[0.35em] text-slate-200">
                     What It Is
                   </p>
                   <p className="mt-2 text-sm text-slate-300">
-                    PlayerPulse lets fans vote for Player of the Week, earn XP
-                    for participation, and climb the fan leaderboard.
+                    Fan voting for Player of the Week, XP rewards, and climb the
+                    leaderboard.
                   </p>
                 </section>
-                <section className="rounded-2xl border border-sky-500/30 bg-sky-500/10 p-4 shadow-[0_0_30px_rgba(56,189,248,0.25)]">
-                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-200">
+
+                <section className="space-y-3">
+                  <p className="text-sm font-semibold uppercase tracking-[0.35em] text-slate-200">
                     Earn XP Daily
                   </p>
-                  <ul className="mt-2 space-y-1 text-sm text-slate-200">
-                    <li>Vote on matchdays</li>
-                    <li>Return streaks (+XP)</li>
-                    <li>Share to gain XP</li>
-                    <li>Watch highlight clips</li>
-                    <li>Predict the winner</li>
-                    <li>React to match moments</li>
-                  </ul>
+                  <div className="space-y-3">
+                    {[
+                      {
+                        label: "Vote on matchdays",
+                        meta: "50/50 XP",
+                        icon: Sparkles,
+                        ring: "text-sky-300",
+                        bg: "border-slate-700/70 bg-slate-900/70",
+                        glow: "shadow-[0_0_22px_rgba(56,189,248,0.35)]",
+                        progress: 1,
+                        ringColor: "#38bdf8",
+                        action: "voting" as const,
+                      },
+                    ].map((item) => {
+                      const Icon = item.icon;
+                      const circumference = 2 * Math.PI * 12;
+                      const dash = circumference * item.progress;
+                      return (
+                        <button
+                          key={item.label}
+                          type="button"
+                          onClick={() => handleXpAction(item.action)}
+                          className={`flex w-full items-center gap-2 overflow-hidden rounded-2xl border ${item.bg} px-1.5 py-2 ${item.glow} transition hover:border-sky-400/60`}
+                        >
+                          <div className="flex min-w-0 flex-1 items-center gap-2">
+                            <div className="flex h-10 w-10 aspect-square items-center justify-center rounded-full border border-white/10 bg-slate-950/70">
+                              <Icon className={`h-4 w-4 ${item.ring}`} />
+                            </div>
+                            <div>
+                              <p className="text-[13px] font-semibold text-slate-100">
+                                {item.label}
+                              </p>
+                              <p className="text-[11px] text-slate-400">
+                                {item.meta}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="relative ml-auto flex h-9 w-9 shrink-0 items-center justify-center">
+                            <svg
+                              className="h-9 w-9"
+                              viewBox="0 0 32 32"
+                              aria-hidden="true"
+                            >
+                              <circle
+                                cx="16"
+                                cy="16"
+                                r="12"
+                                stroke="rgba(148,163,184,0.25)"
+                                strokeWidth="3"
+                                fill="none"
+                              />
+                              <circle
+                                cx="16"
+                                cy="16"
+                                r="12"
+                                stroke={item.ringColor}
+                                strokeWidth="3"
+                                fill="none"
+                                strokeLinecap="round"
+                                strokeDasharray={`${dash} ${circumference}`}
+                                transform="rotate(-90 16 16)"
+                              />
+                            </svg>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    {[
+                      {
+                        label: "Vote on matchdays",
+                        meta: "50/50 XP",
+                        icon: Sparkles,
+                        ring: "text-sky-300",
+                        bg: "bg-sky-500/10 border-sky-500/30",
+                        progress: 1,
+                        ringColor: "#38bdf8",
+                        action: "voting" as const,
+                      },
+                      {
+                        label: "Return streaks",
+                        meta: "7/7 Days",
+                        icon: Flame,
+                        ring: "text-emerald-300",
+                        bg: "border-emerald-500/30 bg-emerald-500/10",
+                        progress: 1,
+                        ringColor: "#34d399",
+                        action: "rewards" as const,
+                      },
+                      {
+                        label: "Share to gain XP",
+                        meta: "Completed",
+                        icon: Share2,
+                        ring: "text-purple-300",
+                        bg: "border-purple-500/30 bg-purple-500/10",
+                        progress: 1,
+                        ringColor: "#a78bfa",
+                        action: "leaderboard" as const,
+                      },
+                      {
+                        label: "Watch highlight clips",
+                        meta: "2/3 Clips",
+                        icon: Play,
+                        ring: "text-amber-300",
+                        bg: "border-amber-500/30 bg-amber-500/10",
+                        progress: 0.66,
+                        ringColor: "#fbbf24",
+                        action: "highlights" as const,
+                      },
+                      {
+                        label: "Predict the winner",
+                        meta: "Pending",
+                        icon: Trophy,
+                        ring: "text-rose-300",
+                        bg: "border-rose-500/30 bg-rose-500/10",
+                        progress: 0.2,
+                        ringColor: "#fb7185",
+                        action: "leaderboard" as const,
+                      },
+                      {
+                        label: "React to match moments",
+                        meta: "10/10",
+                        icon: Smile,
+                        ring: "text-orange-300",
+                        bg: "border-orange-500/30 bg-orange-500/10",
+                        progress: 1,
+                        ringColor: "#fb923c",
+                        action: "rewards" as const,
+                      },
+                    ].map((item) => {
+                      const Icon = item.icon;
+                      const circumference = 2 * Math.PI * 12;
+                      const dash = circumference * item.progress;
+                      return (
+                        <button
+                          key={item.label}
+                          type="button"
+                          onClick={() => handleXpAction(item.action)}
+                          className={`flex w-full items-center gap-2 overflow-hidden rounded-2xl border ${item.bg} px-1.5 py-2 shadow-[0_0_24px_rgba(15,23,42,0.8)] transition hover:border-sky-400/50`}
+                        >
+                          <div className="flex min-w-0 flex-1 items-center gap-2">
+                            <div className="flex h-9 w-9 aspect-square items-center justify-center rounded-full border border-white/10 bg-slate-950/70">
+                              <Icon className={`h-4 w-4 ${item.ring}`} />
+                            </div>
+                            <div>
+                              <p className="text-[13px] font-semibold text-slate-100">
+                                {item.label}
+                              </p>
+                              <p className="text-[11px] text-slate-400">
+                                {item.meta}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="relative ml-auto flex h-8 w-8 shrink-0 items-center justify-center">
+                            <svg
+                              className="h-8 w-8"
+                              viewBox="0 0 32 32"
+                              aria-hidden="true"
+                            >
+                              <circle
+                                cx="16"
+                                cy="16"
+                                r="12"
+                                stroke="rgba(148,163,184,0.25)"
+                                strokeWidth="3"
+                                fill="none"
+                              />
+                              <circle
+                                cx="16"
+                                cy="16"
+                                r="12"
+                                stroke={item.ringColor}
+                                strokeWidth="3"
+                                fill="none"
+                                strokeLinecap="round"
+                                strokeDasharray={`${dash} ${circumference}`}
+                                transform="rotate(-90 16 16)"
+                              />
+                            </svg>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </section>
-                <section className="rounded-2xl border border-emerald-400/40 bg-emerald-500/10 p-4 shadow-[0_0_30px_rgba(16,185,129,0.25)]">
-                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-200">
+
+                <section className="space-y-3">
+                  <p className="text-sm font-semibold uppercase tracking-[0.35em] text-slate-200">
                     How It Works
                   </p>
-                  <p className="mt-2 text-sm text-slate-200">
-                    Voting closes when the timer ends and the winning player is
-                    revealed. Fan rankings keep updating with engagement.
-                  </p>
+                  <div className="relative flex items-center justify-between gap-3 px-4 py-3">
+                    <div className="absolute left-8 right-14 top-7 h-px bg-slate-700/70" />
+                    {[
+                      { label: "Voting Opens", icon: Clock },
+                      { label: "Vote & Engage", icon: Sparkles },
+                      { label: "Winner & Rankings", icon: Trophy },
+                    ].map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <div
+                          key={item.label}
+                          className="relative z-10 flex flex-col items-center gap-2 text-center"
+                        >
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700/80 bg-slate-900/80">
+                            <Icon className="h-4 w-4 text-slate-200" />
+                          </div>
+                          <p className="text-[11px] font-semibold text-slate-300">
+                            {item.label}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </section>
-                <section className="rounded-2xl border border-amber-400/40 bg-amber-500/10 p-4 shadow-[0_0_30px_rgba(251,191,36,0.25)]">
-                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-200">
+
+                <section className="space-y-3">
+                  <p className="text-sm font-semibold uppercase tracking-[0.35em] text-slate-200">
                     Rewards
                   </p>
-                  <p className="mt-2 text-sm text-slate-200">
-                    Active fans are entered into monthly prize draws for
-                    matchday tickets and signed merch.
-                  </p>
+                  <div className="flex gap-3 overflow-x-auto pb-2">
+                    {[
+                      {
+                        label: "Matchday Tickets",
+                        status: "In Progress",
+                        image: "/assets/ticket.png",
+                        badge: "border-sky-400/60 text-sky-200 bg-sky-500/10",
+                      },
+                      {
+                        label: "Signed Merch",
+                        status: "Claimed",
+                        image: "/assets/jersey.png",
+                        badge: "border-emerald-400/60 text-emerald-200 bg-emerald-500/10",
+                      },
+                      {
+                        label: "VIP Upgrade",
+                        status: "Pending",
+                        image: "/assets/vip.png",
+                        badge: "border-amber-400/60 text-amber-200 bg-amber-500/10",
+                      },
+                    ].map((item) => (
+                      <div
+                        key={item.label}
+                        className="min-w-[220px] rounded-2xl border border-white/10 bg-linear-to-br from-white/10 via-slate-950/60 to-slate-950/80 p-4 shadow-[0_0_30px_rgba(15,23,42,0.9)] backdrop-blur"
+                      >
+                        <div className="flex items-center justify-end">
+                          <span
+                            className={`rounded-full border px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] ${item.badge}`}
+                          >
+                            {item.status}
+                          </span>
+                        </div>
+                        <div className="mt-3 flex h-20 items-center justify-center rounded-2xl">
+                          <div className="relative h-24 w-24 overflow-hidden rounded-xl">
+                            <Image
+                              src={item.image}
+                              alt={item.label}
+                              fill
+                              className="object-contain p-2"
+                            />
+                          </div>
+                        </div>
+                        <p className="mt-3 text-sm font-semibold text-slate-100">
+                          {item.label}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-center gap-2 sm:hidden">
+                    {Array.from({ length: 5 }).map((_, index) => (
+                      <span
+                        key={index}
+                        className={`h-1.5 w-1.5 rounded-full ${
+                          index === 1 ? "bg-slate-200" : "bg-slate-600/70"
+                        }`}
+                      />
+                    ))}
+                  </div>
                 </section>
+                </div>
               </div>
               <div className="flex flex-col items-center gap-2 text-xs text-slate-400">
                 {!votingClosed && (

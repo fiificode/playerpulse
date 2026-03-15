@@ -22,16 +22,26 @@ body {
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background: radial-gradient(
+  background:
+    linear-gradient(
+      180deg,
+      rgba(2, 6, 23, 0.45) 0%,
+      rgba(2, 6, 23, 0.65) 55%,
+      rgba(2, 6, 23, 0.78) 100%
+    ),
+    radial-gradient(
       circle at top,
-      rgba(56, 189, 248, 0.18),
+      rgba(56, 189, 248, 0.12),
       transparent 55%
     ),
     radial-gradient(
       circle at bottom,
-      rgba(129, 140, 248, 0.24),
+      rgba(129, 140, 248, 0.12),
       transparent 55%
     ),
-    #020617;
+    url("/assets/stadium.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   color: var(--color-foreground);
 }
