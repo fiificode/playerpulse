@@ -435,6 +435,24 @@ export default function Home() {
               transition={{ duration: 0.4, ease: "easeOut" }}
             >
               <div className="relative w-full overflow-hidden rounded-3xl shadow-[0_0_45px_rgba(15,23,42,0.9)]">
+                <button
+                  type="button"
+                  onClick={() => setPhase("spotlight")}
+                  className="relative w-full overflow-hidden rounded-3xl text-left shadow-[0_0_40px_rgba(15,23,42,0.9)] transition hover:border-sky-400/60"
+                >
+                  <Image
+                    src="/assets/players/haaland.jpg"
+                    alt="Matchday spotlight"
+                    width={960}
+                    height={540}
+                    className="h-44 w-full object-cover sm:h-56"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+                  <div className="absolute bottom-4 left-4 cursor-pointer rounded-full border border-slate-700/80 bg-slate-950/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-200">
+                    Matchday Spotlight
+                  </div>
+                </button>
                 <div className="relative space-y-8 text-left">
                 <section>
                   <p className="text-sm font-semibold uppercase tracking-[0.35em] text-slate-200">
