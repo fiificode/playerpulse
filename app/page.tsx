@@ -33,7 +33,13 @@ export default function Home() {
     "fans" | "players" | "highlights"
   >("fans");
   const [phase, setPhase] = useState<
-    "intro" | "voting" | "submitted" | "leaderboard" | "highlights" | "rewards"
+    | "intro"
+    | "voting"
+    | "submitted"
+    | "leaderboard"
+    | "highlights"
+    | "rewards"
+    | "spotlight"
   >("intro");
   const [introReady, setIntroReady] = useState(false);
 
@@ -280,6 +286,7 @@ export default function Home() {
     "leaderboard",
     "highlights",
     "rewards",
+    "spotlight",
   ] as const;
   const currentStageIndex = stageOrder.indexOf(
     phase === "submitted" ? "leaderboard" : phase,
@@ -417,7 +424,11 @@ export default function Home() {
                   ? "Voting has closed for this round. View the final leaderboard and see who took the crown."
                   : "Pick a standout player, cast one vote, and track the live leaderboard in real time."}
               </p>
-              <div className="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-slate-800/80 bg-slate-950/60 shadow-[0_0_45px_rgba(15,23,42,0.9)]">
+              <button
+                type="button"
+                onClick={() => setPhase("spotlight")}
+                className="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-slate-800/80 bg-slate-950/60 text-left shadow-[0_0_45px_rgba(15,23,42,0.9)] transition hover:border-sky-400/60"
+              >
                 <div className="absolute inset-0 bg-linear-to-br from-sky-500/10 via-transparent to-indigo-500/10" />
                 <Image
                   src="/assets/players/haaland.jpg"
@@ -428,10 +439,10 @@ export default function Home() {
                   priority
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
-                <div className="absolute bottom-4 left-4 rounded-full border border-slate-700/80 bg-slate-950/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-200">
+                <div className="absolute bottom-4 left-4 cursor-pointer rounded-full border border-slate-700/80 bg-slate-950/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-200">
                   Matchday Spotlight
                 </div>
-              </div>
+              </button>
               <div className="grid w-full max-w-3xl gap-4 text-left sm:grid-cols-2">
                 <section className="rounded-2xl border border-slate-800/80 bg-slate-950/70 p-4 shadow-[0_0_30px_rgba(15,23,42,0.9)]">
                   <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
@@ -927,6 +938,74 @@ export default function Home() {
                     ))}
                   </div>
                 </section>
+              </div>
+            </motion.section>
+          )}
+          {phase === "spotlight" && (
+            <motion.section
+              key="spotlight"
+              className="mt-2 flex flex-col items-center gap-6"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -30 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+            >
+              <div className="text-center">
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
+                  Matchday Spotlight
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold text-slate-100">
+                  Featured Performer
+                </h2>
+                <p className="mt-2 text-sm text-slate-400">
+                  A closer look at the standout performance inspiring the
+                  community this week.
+                </p>
+              </div>
+              <div className="w-full max-w-3xl space-y-6">
+                <div className="relative overflow-hidden rounded-3xl border border-slate-800/80 bg-slate-950/70 shadow-[0_0_45px_rgba(15,23,42,0.95)]">
+                  <Image
+                    src="/assets/players/haaland.jpg"
+                    alt="Matchday spotlight"
+                    width={1200}
+                    height={720}
+                    className="h-64 w-full object-cover sm:h-72"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-transparent to-transparent" />
+                  <div className="absolute bottom-5 left-5">
+                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-200">
+                      Spotlight
+                    </p>
+                    <h3 className="mt-2 text-2xl font-semibold text-slate-100">
+                      Erling Haaland
+                    </h3>
+                    <p className="mt-1 text-sm text-slate-300">
+                      3 goals • 9 shots on target • 78% pass accuracy
+                    </p>
+                  </div>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {[
+                    {
+                      title: "Why he’s featured",
+                      body: "A clinical hat-trick with relentless pressing set the tone for the weekend.",
+                    },
+                    {
+                      title: "Moment of the match",
+                      body: "A 68th-minute run in behind sealed the win and set the stadium alight.",
+                    },
+                  ].map((item) => (
+                    <section
+                      key={item.title}
+                      className="rounded-2xl border border-slate-800/80 bg-slate-950/70 p-4 shadow-[0_0_30px_rgba(15,23,42,0.9)]"
+                    >
+                      <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
+                        {item.title}
+                      </p>
+                      <p className="mt-2 text-sm text-slate-300">{item.body}</p>
+                    </section>
+                  ))}
+                </div>
               </div>
             </motion.section>
           )}
