@@ -367,22 +367,36 @@ export default function Home() {
           </div>
         </header>
         <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-          {["Intro", "Voting", "Leaderboard"].map((label, index) => {
+          {(["Intro", "Voting", "Leaderboard"] as const).map((label, index) => {
             const isActive = index === currentStageIndex;
             const isComplete = index < currentStageIndex;
+            const nextPhase =
+              label === "Intro"
+                ? "intro"
+                : label === "Voting"
+                  ? "voting"
+                  : "leaderboard";
+            const isDisabled = votingClosed && nextPhase === "voting";
             return (
-              <span
+              <button
                 key={label}
+                type="button"
+                onClick={() => {
+                  if (isDisabled) return;
+                  setPhase(nextPhase);
+                }}
                 className={`rounded-full border px-3 py-1 transition ${
                   isActive
                     ? "border-sky-400/70 bg-sky-500/15 text-sky-200 shadow-[0_0_14px_rgba(56,189,248,0.6)]"
                     : isComplete
                       ? "border-emerald-400/60 bg-emerald-500/10 text-emerald-200/90"
                       : "border-slate-800/80 bg-slate-950/60"
-                }`}
+                } ${isDisabled ? "cursor-not-allowed opacity-50" : "hover:border-sky-400/60 hover:text-sky-200"}`}
+                aria-current={isActive ? "page" : undefined}
+                aria-label={`Go to ${label}`}
               >
                 {label}
-              </span>
+              </button>
             );
           })}
         </div>
