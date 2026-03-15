@@ -33,9 +33,7 @@ export default function Home() {
   const [phase, setPhase] = useState<
     "intro" | "voting" | "submitted" | "leaderboard"
   >("intro");
-  const [introCount, setIntroCount] = useState(3);
   const [introReady, setIntroReady] = useState(false);
-  const [shakeIntro, setShakeIntro] = useState(false);
 
   const {
     players,
@@ -181,39 +179,8 @@ export default function Home() {
 
   useEffect(() => {
     if (phase !== "intro") return;
-
-    let count = 3;
-    setIntroCount(count);
-    setIntroReady(false);
-
-    const id = setInterval(() => {
-      count -= 1;
-      if (count <= 0) {
-        clearInterval(id);
-        setIntroCount(0);
-        setIntroReady(true);
-        setShakeIntro(true);
-        const audio = getCrowdAudio();
-        if (soundEnabled && audio) {
-          audio.currentTime = 0;
-          audio.play().catch(() => {
-            // ignore playback errors
-          });
-        }
-      } else {
-        setIntroCount(count);
-        setShakeIntro(true);
-      }
-    }, 900);
-
-    return () => clearInterval(id);
-  }, [phase, soundEnabled]);
-
-  useEffect(() => {
-    if (!shakeIntro) return;
-    const id = setTimeout(() => setShakeIntro(false), 240);
-    return () => clearTimeout(id);
-  }, [shakeIntro]);
+    setIntroReady(true);
+  }, [phase]);
 
   useEffect(() => {
     const deadlineMs = new Date(weekDeadline).getTime();
@@ -421,40 +388,18 @@ export default function Home() {
                 Matchday Voting
               </p>
               <motion.div
-                className="text-7xl font-semibold text-sky-200 md:text-8xl"
-                key={votingClosed ? "closed" : `count-${introCount}`}
-                initial={{ scale: 0.6, opacity: 0 }}
-                animate={{
-                  scale: 1,
-                  opacity: 1,
-                  x: shakeIntro ? [0, -8, 8, -6, 6, 0] : 0,
-                  rotate: shakeIntro ? [0, -3, 3, -2, 2, 0] : 0,
-                }}
-                exit={{ scale: 1.2, opacity: 0 }}
+                className="text-4xl font-semibold text-sky-200 md:text-6xl"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, ease: "easeOut" }}
               >
-                {votingClosed
-                  ? "Votes ended"
-                  : introCount > 0
-                    ? introCount
-                    : "GO"}
+                {votingClosed ? "Votes ended" : "Cast your vote"}
               </motion.div>
               <p className="max-w-lg text-balance text-sm text-slate-400 md:text-base">
                 {votingClosed
                   ? "Voting has closed for this round. View the final leaderboard and see who took the crown."
                   : "Pick a standout player, cast one vote, and track the live leaderboard in real time."}
               </p>
-              {!votingClosed && (
-                <p className="max-w-2xl text-balance text-sm text-slate-400 md:text-base">
-                  PlayerPulse lets fans vote for Player of the Week, earn XP for
-                  participating, and climb the fan leaderboard. You gain XP by
-                  voting, returning on matchdays, and jumping into interactive
-                  moments across the experience. When the timer ends, voting
-                  closes and the winning player is revealed, while fan rankings
-                  continue to update with engagement. Active fans are entered
-                  into monthly prize draws.
-                </p>
-              )}
               <div className="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-slate-800/80 bg-slate-950/60 shadow-[0_0_45px_rgba(15,23,42,0.9)]">
                 <div className="absolute inset-0 bg-linear-to-br from-sky-500/10 via-transparent to-indigo-500/10" />
                 <Image
@@ -470,6 +415,50 @@ export default function Home() {
                   Matchday Spotlight
                 </div>
               </div>
+              {!votingClosed && (
+                <div className="grid w-full max-w-3xl gap-4 text-left sm:grid-cols-2">
+                  <section className="rounded-2xl border border-slate-800/80 bg-slate-950/70 p-4 shadow-[0_0_30px_rgba(15,23,42,0.9)]">
+                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
+                      What It Is
+                    </p>
+                    <p className="mt-2 text-sm text-slate-300">
+                      PlayerPulse lets fans vote for Player of the Week, earn XP
+                      for participation, and climb the fan leaderboard.
+                    </p>
+                  </section>
+                  <section className="rounded-2xl border border-sky-500/30 bg-sky-500/10 p-4 shadow-[0_0_30px_rgba(56,189,248,0.25)]">
+                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-200">
+                      Earn XP Daily
+                    </p>
+                    <ul className="mt-2 space-y-1 text-sm text-slate-200">
+                      <li>Vote on matchdays</li>
+                      <li>Return streaks (+XP)</li>
+                      <li>Share to gain XP</li>
+                      <li>Watch highlight clips</li>
+                      <li>Predict the winner</li>
+                      <li>React to match moments</li>
+                    </ul>
+                  </section>
+                  <section className="rounded-2xl border border-emerald-400/40 bg-emerald-500/10 p-4 shadow-[0_0_30px_rgba(16,185,129,0.25)]">
+                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-200">
+                      How It Works
+                    </p>
+                    <p className="mt-2 text-sm text-slate-200">
+                      Voting closes when the timer ends and the winning player
+                      is revealed. Fan rankings keep updating with engagement.
+                    </p>
+                  </section>
+                  <section className="rounded-2xl border border-amber-400/40 bg-amber-500/10 p-4 shadow-[0_0_30px_rgba(251,191,36,0.25)]">
+                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-200">
+                      Rewards
+                    </p>
+                    <p className="mt-2 text-sm text-slate-200">
+                      Active fans are entered into monthly prize draws for
+                      matchday tickets and signed merch.
+                    </p>
+                  </section>
+                </div>
+              )}
               <div className="flex flex-col items-center gap-2 text-xs text-slate-400">
                 {!votingClosed && (
                   <span className="rounded-full border border-emerald-400/60 bg-emerald-500/10 px-3 py-1 text-emerald-200">
