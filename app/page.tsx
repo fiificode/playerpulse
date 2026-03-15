@@ -14,6 +14,8 @@ import { ShareWinner } from "@/components/ShareWinner";
 import { WinnerBanner } from "@/components/WinnerBanner";
 import { WinnerOverlay } from "@/components/WinnerOverlay";
 import { PlayerStatsModal } from "@/components/PlayerStatsModal";
+import { UserLeaderboard } from "@/components/UserLeaderboard";
+import { fanLeaderboard } from "@/data/userLeaderboard";
 
 export default function Home() {
   const nomineesRef = useRef<HTMLDivElement | null>(null);
@@ -24,6 +26,9 @@ export default function Home() {
   const [activeStatsPlayer, setActiveStatsPlayer] = useState<string | null>(
     null,
   );
+  const [leaderboardMode, setLeaderboardMode] = useState<
+    "fans" | "players"
+  >("fans");
   const [phase, setPhase] = useState<
     "intro" | "voting" | "submitted" | "leaderboard"
   >("intro");
@@ -690,7 +695,36 @@ export default function Home() {
                 </section>
               </div>
               <div className="space-y-6">
-                <Leaderboard players={sortedPlayers} totalVotes={totalVotes} />
+                <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                  {[
+                    { id: "fans", label: "Fan XP" },
+                    { id: "players", label: "Player Rankings" },
+                  ].map((tab) => {
+                    const isActive = leaderboardMode === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() =>
+                          setLeaderboardMode(tab.id as "fans" | "players")
+                        }
+                        className={`rounded-full border px-3 py-1 transition ${
+                          isActive
+                            ? "border-sky-400/70 bg-sky-500/15 text-sky-200 shadow-[0_0_14px_rgba(56,189,248,0.6)]"
+                            : "border-slate-800/80 bg-slate-950/60 hover:border-sky-400/60 hover:text-sky-200"
+                        }`}
+                        aria-pressed={isActive}
+                      >
+                        {tab.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                {leaderboardMode === "fans" ? (
+                  <UserLeaderboard fans={fanLeaderboard} />
+                ) : (
+                  <Leaderboard players={sortedPlayers} totalVotes={totalVotes} />
+                )}
                 <section className="rounded-3xl border border-slate-800/80 bg-slate-950/80 p-5 shadow-[0_0_45px_rgba(15,23,42,1)] backdrop-blur-xl">
                   <div className="mb-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
