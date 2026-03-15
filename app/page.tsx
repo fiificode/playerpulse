@@ -17,6 +17,8 @@ import { WinnerOverlay } from "@/components/WinnerOverlay";
 import { PlayerStatsModal } from "@/components/PlayerStatsModal";
 import { UserLeaderboard } from "@/components/UserLeaderboard";
 import { fanLeaderboard } from "@/data/userLeaderboard";
+import { HighlightsPanel } from "@/components/HighlightsPanel";
+import { highlightClips } from "@/data/highlights";
 
 export default function Home() {
   const nomineesRef = useRef<HTMLDivElement | null>(null);
@@ -28,10 +30,10 @@ export default function Home() {
     null,
   );
   const [leaderboardMode, setLeaderboardMode] = useState<
-    "fans" | "players"
+    "fans" | "players" | "highlights"
   >("fans");
   const [phase, setPhase] = useState<
-    "intro" | "voting" | "submitted" | "leaderboard"
+    "intro" | "voting" | "submitted" | "leaderboard" | "highlights" | "rewards"
   >("intro");
   const [introReady, setIntroReady] = useState(false);
 
@@ -272,7 +274,13 @@ export default function Home() {
 
   const currentLeader = sortedPlayers[0] ?? null;
   const crowdEnergy = useMemo(() => Math.min(1, totalVotes / 12), [totalVotes]);
-  const stageOrder = ["intro", "voting", "leaderboard"] as const;
+  const stageOrder = [
+    "intro",
+    "voting",
+    "leaderboard",
+    "highlights",
+    "rewards",
+  ] as const;
   const currentStageIndex = stageOrder.indexOf(
     phase === "submitted" ? "leaderboard" : phase,
   );
@@ -340,7 +348,9 @@ export default function Home() {
           </div>
         </header>
         <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-          {(["Intro", "Voting", "Leaderboard"] as const).map((label, index) => {
+          {(
+            ["Intro", "Voting", "Leaderboard", "Highlights", "Rewards"] as const
+          ).map((label, index) => {
             const isActive = index === currentStageIndex;
             const isComplete = index < currentStageIndex;
             const nextPhase =
@@ -348,7 +358,11 @@ export default function Home() {
                 ? "intro"
                 : label === "Voting"
                   ? "voting"
-                  : "leaderboard";
+                  : label === "Highlights"
+                    ? "highlights"
+                    : label === "Rewards"
+                      ? "rewards"
+                      : "leaderboard";
             const isDisabled = votingClosed && nextPhase === "voting";
             return (
               <button
@@ -356,6 +370,9 @@ export default function Home() {
                 type="button"
                 onClick={() => {
                   if (isDisabled) return;
+                  if (label === "Highlights") {
+                    setLeaderboardMode("highlights");
+                  }
                   setPhase(nextPhase);
                 }}
                 className={`rounded-full border px-3 py-1 transition ${
@@ -720,7 +737,9 @@ export default function Home() {
                         key={tab.id}
                         type="button"
                         onClick={() =>
-                          setLeaderboardMode(tab.id as "fans" | "players")
+                          setLeaderboardMode(
+                            tab.id as "fans" | "players" | "highlights",
+                          )
                         }
                         className={`rounded-full border px-3 py-1 transition ${
                           isActive
@@ -734,9 +753,10 @@ export default function Home() {
                     );
                   })}
                 </div>
-                {leaderboardMode === "fans" ? (
+                {leaderboardMode === "fans" && (
                   <UserLeaderboard fans={fanLeaderboard} />
-                ) : (
+                )}
+                {leaderboardMode === "players" && (
                   <Leaderboard players={sortedPlayers} totalVotes={totalVotes} />
                 )}
                 <section className="rounded-3xl border border-slate-800/80 bg-slate-950/80 p-5 shadow-[0_0_45px_rgba(15,23,42,1)] backdrop-blur-xl">
@@ -792,6 +812,119 @@ export default function Home() {
                         Weekly bonus for voting early.
                       </p>
                     </div>
+                  </div>
+                </section>
+              </div>
+            </motion.section>
+          )}
+          {phase === "highlights" && (
+            <motion.section
+              key="highlights"
+              className="mt-2 flex flex-col items-center gap-6"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -30 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+            >
+              <div className="text-center">
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
+                  Highlights
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold text-slate-100">
+                  Premier League Moments
+                </h2>
+                <p className="mt-2 text-sm text-slate-400">
+                  Catch up on the latest goals and matchday recaps.
+                </p>
+              </div>
+              <HighlightsPanel
+                clips={highlightClips}
+                className="md:w-full md:max-w-3xl"
+              />
+            </motion.section>
+          )}
+          {phase === "rewards" && (
+            <motion.section
+              key="rewards"
+              className="mt-2 flex flex-col items-center gap-6"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -30 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+            >
+              <div className="text-center">
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
+                  Rewards
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold text-slate-100">
+                  Play, Earn, Win
+                </h2>
+                <p className="mt-2 text-sm text-slate-400">
+                  Active fans earn entries into monthly prize draws.
+                </p>
+              </div>
+              <div className="grid w-full max-w-4xl gap-6 md:grid-cols-2">
+                <section className="rounded-3xl border border-slate-800/80 bg-slate-950/80 p-6 shadow-[0_0_45px_rgba(15,23,42,1)] backdrop-blur-xl">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
+                        Weekly Raffle
+                      </p>
+                      <h3 className="mt-1 text-lg font-semibold text-slate-100">
+                        Win matchday tickets
+                      </h3>
+                    </div>
+                    <span className="rounded-full border border-emerald-400/60 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-200">
+                      Live
+                    </span>
+                  </div>
+                  <p className="mt-3 text-sm text-slate-400">
+                    Vote, share, and stay active to earn entries. Winners
+                    announced monthly.
+                  </p>
+                  <div className="mt-4 grid gap-3 text-sm text-slate-300">
+                    {[
+                      "Vote on matchdays",
+                      "Share highlights",
+                      "Hit your weekly streak",
+                      "Engage with match moments",
+                    ].map((item) => (
+                      <div
+                        key={item}
+                        className="rounded-2xl border border-slate-800/80 bg-slate-900/60 px-4 py-3"
+                      >
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+                <section className="rounded-3xl border border-slate-800/80 bg-slate-950/70 p-6 shadow-[0_0_40px_rgba(15,23,42,0.95)]">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-300">
+                      Rewards Won
+                    </h3>
+                    <span className="text-xs text-slate-500">
+                      Last 4 months
+                    </span>
+                  </div>
+                  <div className="space-y-3">
+                    {[
+                      { month: "February", reward: "2x VIP tickets" },
+                      { month: "January", reward: "Signed jersey raffle" },
+                      {
+                        month: "December",
+                        reward: "Matchday hospitality pass",
+                      },
+                      { month: "November", reward: "Training ground tour" },
+                    ].map((item) => (
+                      <div
+                        key={item.month}
+                        className="flex items-center justify-between rounded-2xl border border-slate-800/80 bg-slate-900/60 px-4 py-3 text-sm"
+                      >
+                        <span className="text-slate-200">{item.month}</span>
+                        <span className="text-slate-400">{item.reward}</span>
+                      </div>
+                    ))}
                   </div>
                 </section>
               </div>
