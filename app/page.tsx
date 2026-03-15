@@ -415,50 +415,48 @@ export default function Home() {
                   Matchday Spotlight
                 </div>
               </div>
-              {!votingClosed && (
-                <div className="grid w-full max-w-3xl gap-4 text-left sm:grid-cols-2">
-                  <section className="rounded-2xl border border-slate-800/80 bg-slate-950/70 p-4 shadow-[0_0_30px_rgba(15,23,42,0.9)]">
-                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
-                      What It Is
-                    </p>
-                    <p className="mt-2 text-sm text-slate-300">
-                      PlayerPulse lets fans vote for Player of the Week, earn XP
-                      for participation, and climb the fan leaderboard.
-                    </p>
-                  </section>
-                  <section className="rounded-2xl border border-sky-500/30 bg-sky-500/10 p-4 shadow-[0_0_30px_rgba(56,189,248,0.25)]">
-                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-200">
-                      Earn XP Daily
-                    </p>
-                    <ul className="mt-2 space-y-1 text-sm text-slate-200">
-                      <li>Vote on matchdays</li>
-                      <li>Return streaks (+XP)</li>
-                      <li>Share to gain XP</li>
-                      <li>Watch highlight clips</li>
-                      <li>Predict the winner</li>
-                      <li>React to match moments</li>
-                    </ul>
-                  </section>
-                  <section className="rounded-2xl border border-emerald-400/40 bg-emerald-500/10 p-4 shadow-[0_0_30px_rgba(16,185,129,0.25)]">
-                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-200">
-                      How It Works
-                    </p>
-                    <p className="mt-2 text-sm text-slate-200">
-                      Voting closes when the timer ends and the winning player
-                      is revealed. Fan rankings keep updating with engagement.
-                    </p>
-                  </section>
-                  <section className="rounded-2xl border border-amber-400/40 bg-amber-500/10 p-4 shadow-[0_0_30px_rgba(251,191,36,0.25)]">
-                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-200">
-                      Rewards
-                    </p>
-                    <p className="mt-2 text-sm text-slate-200">
-                      Active fans are entered into monthly prize draws for
-                      matchday tickets and signed merch.
-                    </p>
-                  </section>
-                </div>
-              )}
+              <div className="grid w-full max-w-3xl gap-4 text-left sm:grid-cols-2">
+                <section className="rounded-2xl border border-slate-800/80 bg-slate-950/70 p-4 shadow-[0_0_30px_rgba(15,23,42,0.9)]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
+                    What It Is
+                  </p>
+                  <p className="mt-2 text-sm text-slate-300">
+                    PlayerPulse lets fans vote for Player of the Week, earn XP
+                    for participation, and climb the fan leaderboard.
+                  </p>
+                </section>
+                <section className="rounded-2xl border border-sky-500/30 bg-sky-500/10 p-4 shadow-[0_0_30px_rgba(56,189,248,0.25)]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-200">
+                    Earn XP Daily
+                  </p>
+                  <ul className="mt-2 space-y-1 text-sm text-slate-200">
+                    <li>Vote on matchdays</li>
+                    <li>Return streaks (+XP)</li>
+                    <li>Share to gain XP</li>
+                    <li>Watch highlight clips</li>
+                    <li>Predict the winner</li>
+                    <li>React to match moments</li>
+                  </ul>
+                </section>
+                <section className="rounded-2xl border border-emerald-400/40 bg-emerald-500/10 p-4 shadow-[0_0_30px_rgba(16,185,129,0.25)]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-200">
+                    How It Works
+                  </p>
+                  <p className="mt-2 text-sm text-slate-200">
+                    Voting closes when the timer ends and the winning player is
+                    revealed. Fan rankings keep updating with engagement.
+                  </p>
+                </section>
+                <section className="rounded-2xl border border-amber-400/40 bg-amber-500/10 p-4 shadow-[0_0_30px_rgba(251,191,36,0.25)]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-200">
+                    Rewards
+                  </p>
+                  <p className="mt-2 text-sm text-slate-200">
+                    Active fans are entered into monthly prize draws for
+                    matchday tickets and signed merch.
+                  </p>
+                </section>
+              </div>
               <div className="flex flex-col items-center gap-2 text-xs text-slate-400">
                 {!votingClosed && (
                   <span className="rounded-full border border-emerald-400/60 bg-emerald-500/10 px-3 py-1 text-emerald-200">
