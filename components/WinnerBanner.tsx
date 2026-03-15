@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import type { Player } from "@/types/player";
 
 type WinnerBannerProps = {
@@ -43,24 +44,42 @@ export function WinnerBanner({ winner }: WinnerBannerProps) {
       </div>
 
       <motion.div
-        className="relative flex flex-col gap-2"
+        className="relative flex flex-col gap-4 sm:grid sm:grid-cols-[auto_1fr]"
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-200">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-200 sm:hidden">
           Voting closed
         </p>
-        <h2 className="text-lg font-semibold text-amber-50">
-          Player of the Week: {winner.name}
-        </h2>
-        <p className="text-xs text-amber-100">
-          {winner.club} • {winner.position}
-        </p>
-        <p className="mt-1 text-xs text-amber-100/90">
-          Final votes:{" "}
-          <span className="font-semibold text-amber-50">{winner.votes}</span>
-        </p>
+        <div className="relative h-20 w-20 overflow-hidden rounded-2xl border border-amber-300/60 bg-amber-200/10 shadow-[0_0_25px_rgba(251,191,36,0.55)]">
+          <Image
+            src={winner.image}
+            alt={winner.name}
+            width={80}
+            height={80}
+            className="h-full w-full object-cover"
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <p className="hidden text-xs font-semibold uppercase tracking-[0.3em] text-amber-200 sm:block">
+            Voting closed
+          </p>
+          <h2 className="text-lg font-semibold text-amber-50">
+            Player of the Week: {winner.name}
+          </h2>
+          <p className="text-xs text-amber-100">
+            {winner.club} • {winner.position}
+          </p>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-amber-100/90">
+            <span className="rounded-full border border-amber-300/40 bg-amber-400/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-100">
+              Final votes
+            </span>
+            <span className="font-semibold text-amber-50">{winner.votes}</span>
+            <span className="text-amber-100/70">•</span>
+            <span className="text-amber-100/90">Top fan XP bonus</span>
+          </div>
+        </div>
       </motion.div>
     </section>
   );
