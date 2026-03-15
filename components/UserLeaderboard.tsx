@@ -40,7 +40,7 @@ export function UserLeaderboard({ fans }: UserLeaderboardProps) {
           Fan XP Leaderboard
         </h2>
         <p className="text-xs text-slate-400">
-          Weekly XP
+          Today XP
         </p>
       </div>
 
